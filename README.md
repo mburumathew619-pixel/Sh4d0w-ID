@@ -10,5 +10,12 @@ It operates in two modes — an interactive prompt where you can submit multiple
 Built for penetration testers, CTF players, and security researchers who need fast, reliable hash identification without leaving the terminal.
 
 ********************Basic Installation & Usage Guide********************
-git clone
-cd 
+
+ Step 1: 
+ git clone <git url>
+
+ Step 2:  
+ cd Sh4d0w
+
+ Step 3:
+ python sh4d0w.py 
