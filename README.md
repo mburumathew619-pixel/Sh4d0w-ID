@@ -15,7 +15,7 @@ Built for penetration testers, CTF players, and security researchers who need fa
  git clone <git url>
 
  Step 2:  
- cd Sh4d0w
+ cd Sh4d0w-ID
 
  Step 3:
  python sh4d0w.py 
