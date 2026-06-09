@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sh4d0w - Hash Algorithm Identifier  v4.0
+Sh4d0w - Hash Algorithm Identifier  v4.1
 Usage:
     python shadow.py              # interactive mode
     python shadow.py '<hash>'     # single hash
@@ -18,6 +18,7 @@ GREEN  = "\033[92m"
 YELLOW = "\033[93m"
 CYAN   = "\033[96m"
 MAGENTA= "\033[95m"
+BLUE   = "\033[94m"
 RESET  = "\033[0m"
 
 ASCII_ART_LINES = [
@@ -32,11 +33,9 @@ ASCII_ART_LINES = [
 ]
 
 # ---------------------------------------------------------------------------
-# HASHCAT MODE MAP  { display_name_keyword : hashcat_mode_number(s) }
-# Used to suggest hashcat -m values alongside identification results.
+# HASHCAT MODE MAP
 # ---------------------------------------------------------------------------
 HASHCAT_MODES = {
-    # Raw MD / SHA
     "MD5":                              [0],
     "MD4":                              [900],
     "MD2":                              [],
@@ -65,7 +64,6 @@ HASHCAT_MODES = {
     "GOST R 34.11-2012 (Streebog-256)": [11700],
     "GOST R 34.11-2012 (Streebog-512)": [11800],
     "SM3":                              [31100],
-    # Authenticated / HMAC
     "HMAC-MD5 (key = $pass)":           [50],
     "HMAC-MD5 (key = $salt)":           [60],
     "HMAC-SHA1 (key = $pass)":          [150],
@@ -79,7 +77,6 @@ HASHCAT_MODES = {
     "HMAC-Streebog-256":                [11750, 11760],
     "HMAC-Streebog-512":                [11850, 11860],
     "SipHash":                          [10100],
-    # Password KDFs
     "bcrypt":                           [3200],
     "Argon2":                           [34000, 70000],
     "scrypt":                           [8900, 70100, 70200],
@@ -91,7 +88,6 @@ HASHCAT_MODES = {
     "PBKDF2 (Django)":                  [10000],
     "Django SHA-1":                     [124],
     "phpass":                           [400],
-    # Unix crypt
     "md5crypt":                         [500],
     "sha256crypt":                      [7400],
     "sha512crypt":                      [1800],
@@ -106,7 +102,6 @@ HASHCAT_MODES = {
     "QNX /etc/shadow MD5":              [19000],
     "QNX /etc/shadow SHA256":           [19100],
     "QNX /etc/shadow SHA512":           [19200],
-    # Windows
     "LM":                               [3000],
     "DCC / MS Cache":                   [1100],
     "DCC2 / MS Cache 2":                [2100],
@@ -115,7 +110,6 @@ HASHCAT_MODES = {
     "MS-AzureSync":                     [12800],
     "Windows Hello":                    [28100],
     "Microsoft Online Account":         [33700],
-    # Network protocols
     "NetNTLMv1":                        [5500],
     "NetNTLMv2":                        [5600],
     "Kerberos 5, etype 23, AS-REQ":     [7500],
@@ -147,7 +141,6 @@ HASHCAT_MODES = {
     "Flask Session Cookie":             [29100],
     "MS SNTP":                          [31300],
     "NetNTLMv1+ESS":                    [5500],
-    # Databases
     "MySQL 3.x":                        [200],
     "MySQL 4.1+":                       [300],
     "MySQL CRAM (SHA1)":                [11200],
@@ -169,7 +162,6 @@ HASHCAT_MODES = {
     "RACF KDFAES":                      [14200],
     "AS/400 DES":                       [8501],
     "AS/400 SSHA1":                     [35200],
-    # Application / CMS
     "WordPress / phpBB":                [400],
     "Drupal 7":                         [7900],
     "Joomla < 2.5.18":                  [11],
@@ -206,7 +198,6 @@ HASHCAT_MODES = {
     "Ruby on Rails Restful":            [19500, 27200],
     "Anope IRC enc_sha256":             [30700],
     "Teamspeak 3":                      [28300],
-    # Operating systems
     "macOS v10.4-10.6":                 [122],
     "macOS v10.7":                      [1722],
     "macOS v10.8+":                     [7100],
@@ -231,7 +222,6 @@ HASHCAT_MODES = {
     "iPhone passcode":                  [26500],
     "Windows Phone 8+":                 [13800],
     "DPAPI":                            [15300],
-    # Enterprise
     "SAP CODVN B (BCODE)":              [7700, 7701],
     "SAP CODVN F/G (PASSCODE)":         [7800, 7801],
     "SAP CODVN H":                      [10300, 35000],
@@ -253,7 +243,6 @@ HASHCAT_MODES = {
     "SecureCRT":                        [31400],
     "Dahua Authentication MD5":         [24900],
     "KNX IP Secure":                    [25900],
-    # FDE
     "BitLocker":                        [22100],
     "FileVault 2":                      [16700],
     "Apple APFS":                       [18300],
@@ -274,7 +263,6 @@ HASHCAT_MODES = {
     "VirtualBox":                       [27500, 27600],
     "AES Crypt SHA256":                 [22400],
     "Android FDE":                      [8800],
-    # Archives
     "RAR3-hp":                          [12500],
     "RAR3-p":                           [23700],
     "RAR5":                             [13000],
@@ -292,7 +280,6 @@ HASHCAT_MODES = {
     "Android Backup":                   [18900],
     "mega.nz":                          [33400],
     "RC4":                              [33500, 33501, 33502],
-    # Documents
     "MS Office 2007":                   [9400],
     "MS Office 2010":                   [9500],
     "MS Office 2013":                   [9600],
@@ -307,7 +294,6 @@ HASHCAT_MODES = {
     "ODF 1.1":                          [18600],
     "Apple Secure Notes":               [16200],
     "Apple iWork":                      [23300],
-    # Password managers
     "1Password agilekeychain":          [6600],
     "1Password cloudkeychain":          [8200],
     "1Password mobilekeychain":         [31800],
@@ -321,7 +307,6 @@ HASHCAT_MODES = {
     "Apple Keychain":                   [23100],
     "Mozilla key3.db":                  [26000],
     "Mozilla key4.db":                  [26100],
-    # Cryptocurrency
     "Bitcoin/Litecoin wallet.dat":      [11300],
     "Blockchain My Wallet V2":          [15200],
     "Blockchain My Wallet":             [12700],
@@ -343,7 +328,6 @@ HASHCAT_MODES = {
     "Terra Station":                    [29600],
     "Stargazer Stellar":                [25500],
     "Exodus Desktop":                   [28200],
-    # Private keys
     "RSA/DSA/EC/OpenSSH ($0$)":         [22911],
     "RSA/DSA/EC/OpenSSH ($6$)":         [22921],
     "RSA/DSA/EC/OpenSSH ($1/$3$)":      [22931],
@@ -353,405 +337,546 @@ HASHCAT_MODES = {
     "GPG":                              [17010, 17020, 17030, 17040],
     "PKCS#8 PBKDF2-HMAC-SHA1":         [24410],
     "PKCS#8 PBKDF2-HMAC-SHA256":        [24420],
-    # Checksums
     "CRC32":                            [11500],
     "CRC32C":                           [27900],
     "CRC64Jones":                       [28000],
     "MurmurHash":                       [25700],
     "MurmurHash3":                      [27800],
     "MurmurHash64A":                    [34200, 34201, 34211],
-    # Misc raw
     "LM (hashcat 3000)":                [3000],
     "Half MD5":                         [5100],
     "Domain Cached Credentials (DCC)":  [1100],
     "TOTP (HMAC-SHA1)":                 [18100],
 }
 
+# ---------------------------------------------------------------------------
+# JOHN THE RIPPER FORMAT MAP
+# { keyword : [john --format= strings] }
+# ---------------------------------------------------------------------------
+JOHN_FORMATS = {
+    # Raw / generic
+    "MD5":              ["raw-md5", "raw-md5u"],
+    "MD4":              ["raw-md4"],
+    "MD2":              [],
+    "NTLM":             ["nt"],
+    "SHA-1":            ["raw-sha1", "raw-sha1-linkedin"],
+    "SHA-224":          ["raw-sha224"],
+    "SHA-256":          ["raw-sha256"],
+    "SHA-384":          ["raw-sha384"],
+    "SHA-512":          ["raw-sha512"],
+    "SHA3-256":         ["raw-sha3-256"],
+    "SHA3-512":         ["raw-sha3-512"],
+    "Keccak-256":       ["raw-keccak-256"],
+    "Keccak-512":       ["raw-keccak"],
+    "RIPEMD-160":       ["raw-ripemd160"],
+    "Whirlpool":        ["whirlpool"],
+    "BLAKE2b":          ["raw-blake2"],
+    "GOST R 34.11-94":  ["gost"],
+    "Streebog-256":     ["streebog-256"],
+    "Streebog-512":     ["streebog-512"],
+    # Unix crypt
+    "md5crypt":         ["md5crypt"],
+    "sha256crypt":      ["sha256crypt"],
+    "sha512crypt":      ["sha512crypt"],
+    "bcrypt":           ["bcrypt"],
+    "yescrypt":         ["yescrypt"],
+    "scrypt":           ["scrypt"],
+    "Argon2":           ["argon2"],
+    "BSDi Crypt":       ["bsdi"],
+    "crypt(3) DES":     ["descrypt"],
+    "SunMD5 crypt":     ["sunmd5"],
+    "sha1crypt":        ["sha1crypt"],
+    # Windows
+    "LM":               ["lm"],
+    "DCC / MS Cache":   ["mscash"],
+    "DCC2 / MS Cache 2":["mscash2"],
+    "NetNTLMv1":        ["netntlm"],
+    "NetNTLMv2":        ["netntlmv2"],
+    # Kerberos
+    "Kerberos 5, etype 23, AS-REQ":   ["krb5pa-md5"],
+    "Kerberos 5, etype 23, TGS-REP":  ["krb5tgs"],
+    "Kerberos 5, etype 23, AS-REP":   ["krb5asrep"],
+    "Kerberos 5, etype 17, TGS-REP":  ["krb5tgs-aes128"],
+    "Kerberos 5, etype 18, TGS-REP":  ["krb5tgs-aes256"],
+    # WPA
+    "WPA":              ["wpapsk"],
+    # PBKDF2
+    "PBKDF2-HMAC-SHA1":   ["PBKDF2-HMAC-SHA1"],
+    "PBKDF2-HMAC-SHA256":  ["PBKDF2-HMAC-SHA256", "django"],
+    "PBKDF2-HMAC-SHA512":  ["PBKDF2-HMAC-SHA512"],
+    # Application / CMS
+    "phpass":           ["phpass"],
+    "WordPress":        ["phpass"],
+    "Drupal":           ["drupal7"],
+    "Django SHA-1":     ["django-sha1"],
+    "Django PBKDF2":    ["django"],
+    "Joomla":           ["md5"],
+    "vBulletin":        ["vbulletin"],
+    "MyBB":             ["md5"],
+    "MediaWiki":        ["mediawiki"],
+    "LDAP SHA-1":       ["nsldap"],
+    "LDAP Salted SHA-1":["nsldaps"],
+    "LDAP Salted SHA-256": ["PBKDF2-HMAC-SHA256"],
+    "Apache MD5":       ["apr1"],
+    "Apache $apr1$":    ["apr1"],
+    # Databases
+    "MySQL 3.x":        ["mysql"],
+    "MySQL 4.1+":       ["mysql-sha1"],
+    "MSSQL 2000":       ["mssql"],
+    "MSSQL 2005":       ["mssql05"],
+    "MSSQL 2012":       ["mssql12"],
+    "Oracle 11g":       ["oracle11"],
+    "Oracle 10g":       ["oracle"],
+    "Oracle 12":        ["oracle12c"],
+    "PostgreSQL":       ["dynamic_1034"],
+    "Sybase":           ["sybasease"],
+    # OS / Network
+    "Cisco-PIX":        ["pix-md5"],
+    "Cisco-ASA":        ["asa-md5"],
+    "Cisco-IOS type 4": ["cisco4"],
+    "Cisco-IOS $8$":    ["cisco8"],
+    "Cisco-IOS $9$":    ["cisco9"],
+    "Juniper":          ["juniper"],
+    "FortiGate":        ["fortigate"],
+    "Citrix NetScaler": ["netscaler"],
+    "macOS v10.4":      ["xsha"],
+    "macOS v10.7":      ["xsha512"],
+    "macOS v10.8":      ["pbkdf2-hmac-sha512"],
+    "GRUB 2":           ["grub2"],
+    "AIX {smd5}":       ["aix-smd5"],
+    "AIX {ssha1}":      ["aix-ssha1"],
+    "AIX {ssha256}":    ["aix-ssha256"],
+    "AIX {ssha512}":    ["aix-ssha512"],
+    # SAP
+    "SAP CODVN B":      ["sapb"],
+    "SAP CODVN F":      ["sapg"],
+    "SAP CODVN G":      ["sapg"],
+    "SAP CODVN H":      ["saph"],
+    # Lotus / Notes
+    "Lotus Notes/Domino 5":  ["lotus5"],
+    "Lotus Notes/Domino 6":  ["lotus6"],
+    "Lotus Notes/Domino 8":  ["lotus8"],
+    # Password managers
+    "KeePass":          ["keepass"],
+    "LastPass":         ["lastpass"],
+    "1Password":        ["agilekeychain"],
+    "Password Safe":    ["pwsafe"],
+    "Bitwarden":        ["bitwarden"],
+    # Archives
+    "RAR3":             ["rar"],
+    "RAR5":             ["rar5"],
+    "7-Zip":            ["7z"],
+    "ZIP":              ["zip", "pkzip"],
+    "AxCrypt":          ["axcrypt"],
+    "iTunes":           ["itunes-backup"],
+    # Documents
+    "MS Office 2007":   ["office2007"],
+    "MS Office 2010":   ["office2010"],
+    "MS Office 2013":   ["office2013"],
+    "MS Office 2016":   ["office2016"],
+    "MS Office <= 2003":["oldoffice"],
+    "PDF":              ["pdf"],
+    "ODF":              ["odf"],
+    # Crypto wallets
+    "Bitcoin":          ["bitcoin"],
+    "Ethereum":         ["ethereum"],
+    "Electrum":         ["electrum"],
+    "KeePass KDBX":     ["keepass"],
+    # Network
+    "JWT":              ["jwt"],
+    "SIP":              ["sip"],
+    "CRAM-MD5":         ["cram-md5"],
+    "TACACS+":          ["tacacs-plus"],
+    "SNMP":             ["snmpv3"],
+    "iSCSI":            ["iscsi-chap"],
+    # SSH / PKI
+    "OpenSSH":          ["ssh"],
+    "GPG":              ["gpg"],
+    # Misc
+    "PeopleSoft":       ["peoplesoft"],
+    "RACF":             ["racf"],
+    "HMAC-MD5":         ["hmac-md5"],
+    "HMAC-SHA1":        ["hmac-sha1"],
+    "HMAC-SHA256":      ["hmac-sha256"],
+    "HMAC-SHA512":      ["hmac-sha512"],
+}
 
-def suggest_hashcat(algo_name: str) -> list[int]:
-    """Return a list of possible hashcat -m values for the identified algorithm."""
+
+def suggest_hashcat(algo_name: str) -> list:
     modes = []
     algo_lower = algo_name.lower()
     for key, vals in HASHCAT_MODES.items():
         if key.lower() in algo_lower or algo_lower in key.lower():
             modes.extend(vals)
-    # Deduplicate, preserve order
     seen = set()
     result = []
     for m in modes:
         if m not in seen:
             seen.add(m)
             result.append(m)
-    return result[:8]  # Cap display at 8 suggestions
+    return result[:8]
+
+
+def suggest_john(algo_name: str) -> list:
+    """Return a list of possible john --format= values for the identified algorithm."""
+    formats = []
+    algo_lower = algo_name.lower()
+    for key, vals in JOHN_FORMATS.items():
+        if key.lower() in algo_lower or algo_lower in key.lower():
+            formats.extend(vals)
+    # Deduplicate, preserve order
+    seen = set()
+    result = []
+    for f in formats:
+        if f not in seen:
+            seen.add(f)
+            result.append(f)
+    return result[:6]
 
 
 # ---------------------------------------------------------------------------
-# MODULAR / PREFIXED PATTERNS  (checked first – highest specificity)
-# Each entry: (regex, display_name, category)
+# MODULAR / PREFIXED PATTERNS
 # ---------------------------------------------------------------------------
 MODULAR_PATTERNS = [
-
     # ── Password KDFs ────────────────────────────────────────────────────────
     (r"^\$y\$",                                 "yescrypt (Linux default, Debian 11+/Ubuntu 22.04+)",    "Password KDF"),
     (r"^\$gy\$",                                "gost-yescrypt",                                         "Password KDF"),
     (r"^\$7\$",                                 "scrypt ($7$)",                                          "Password KDF"),
-    (r"^\$2[ayb]?\$\d{2}\$",                    "bcrypt ($2a$/$2b$/$2y$) — hashcat 3200", "Password KDF"),
-    (r"^\$argon2(i|d|id)\$",                   "Argon2 (Argon2d / Argon2i / Argon2id)",                 "Password KDF"),
+    (r"^\$2[ayb]?\$\d{2}\$",                    "bcrypt ($2a$/$2b$/$2y$) — hashcat 3200",                "Password KDF"),
+    (r"^\$argon2(i|d|id)\$",                    "Argon2 (Argon2d / Argon2i / Argon2id)",                 "Password KDF"),
     (r"^\$s0\$",                                "scrypt ($s0$)",                                         "Password KDF"),
     (r"^pbkdf2_sha256\$",                       "Django PBKDF2-SHA256",                                  "Password KDF"),
     (r"^pbkdf2_sha512\$",                       "Django PBKDF2-SHA512",                                  "Password KDF"),
     (r"^pbkdf2_sha1\$",                         "Django PBKDF2-SHA1",                                    "Password KDF"),
     (r"^\$balloon\$",                           "Balloon Hash",                                          "Password KDF"),
     (r"^SCRYPT:",                               "scrypt (hashcat SCRYPT: format)",                       "Password KDF"),
-    (r"^\$pbkdf2-sha512\$",                    "PBKDF2-HMAC-SHA512 (Python passlib)",                   "Password KDF"),
-    (r"^\$pbkdf2-sha256\$",                    "PBKDF2-HMAC-SHA256 (Python passlib)",                   "Password KDF"),
-    (r"^\$pbkdf2\$",                           "PBKDF2-HMAC-SHA1 (Python passlib)",                     "Password KDF"),
-    (r"^sha256:\d+:",                          "PBKDF2-HMAC-SHA256 (generic / hashcat 10900)",          "Password KDF"),
-    (r"^sha512:\d+:",                          "PBKDF2-HMAC-SHA512 (generic / hashcat 12100)",          "Password KDF"),
-    (r"^sha1:\d+:",                            "PBKDF2-HMAC-SHA1 (generic / hashcat 12000)",            "Password KDF"),
-    (r"^md5:\d+:",                             "PBKDF2-HMAC-MD5 (generic / hashcat 11900)",             "Password KDF"),
-    (r"^PBKDF1:sha1:",                         "PBKDF1-SHA1 (hashcat 32900)",                           "Password KDF"),
-    (r"^\$pbkdf2-hmac-sha1\$",                "NetIQ SSPR PBKDF2WithHmacSHA1",                         "Enterprise App"),
-    (r"^\$pbkdf2-hmac-sha512\$",              "NetIQ SSPR PBKDF2WithHmacSHA512",                       "Enterprise App"),
-    (r"^pbkdf2\(\d+,\d+,sha",                 "Web2py / passlib pbkdf2",                               "Password KDF"),
-    (r"^\$bcrypt-sha256\$",                   "bcrypt(HMAC-SHA256($pass)) — passlib",                  "Password KDF"),
-
+    (r"^\$pbkdf2-sha512\$",                     "PBKDF2-HMAC-SHA512 (Python passlib)",                   "Password KDF"),
+    (r"^\$pbkdf2-sha256\$",                     "PBKDF2-HMAC-SHA256 (Python passlib)",                   "Password KDF"),
+    (r"^\$pbkdf2\$",                            "PBKDF2-HMAC-SHA1 (Python passlib)",                     "Password KDF"),
+    (r"^sha256:\d+:",                           "PBKDF2-HMAC-SHA256 (generic / hashcat 10900)",          "Password KDF"),
+    (r"^sha512:\d+:",                           "PBKDF2-HMAC-SHA512 (generic / hashcat 12100)",          "Password KDF"),
+    (r"^sha1:\d+:",                             "PBKDF2-HMAC-SHA1 (generic / hashcat 12000)",            "Password KDF"),
+    (r"^md5:\d+:",                              "PBKDF2-HMAC-MD5 (generic / hashcat 11900)",             "Password KDF"),
+    (r"^PBKDF1:sha1:",                          "PBKDF1-SHA1 (hashcat 32900)",                           "Password KDF"),
+    (r"^\$pbkdf2-hmac-sha1\$",                  "NetIQ SSPR PBKDF2WithHmacSHA1",                         "Enterprise App"),
+    (r"^\$pbkdf2-hmac-sha512\$",                "NetIQ SSPR PBKDF2WithHmacSHA512",                       "Enterprise App"),
+    (r"^pbkdf2\(\d+,\d+,sha",                  "Web2py / passlib pbkdf2",                               "Password KDF"),
+    (r"^\$bcrypt-sha256\$",                     "bcrypt(HMAC-SHA256($pass)) — passlib",                  "Password KDF"),
     # ── Unix / Linux crypt ────────────────────────────────────────────────────
-    (r"^\$1\$.{1,8}\$",                        "md5crypt / Unix MD5 crypt / Cisco-IOS $1$ ($1$) — hashcat 500", "Unix/Linux Hash"),
-    (r"^\$5\$",                               "sha256crypt / Unix SHA-256 crypt ($5$)",                  "Unix/Linux Hash"),
-    (r"^\$6\$",                               "sha512crypt / Unix SHA-512 crypt ($6$)",                  "Unix/Linux Hash"),
-    (r"^\$sm3\$",                             "sm3crypt / SM3 Unix ($sm3$)",                             "Unix/Linux Hash"),
-    (r"^\$md5",                               "SunMD5 crypt",                                           "Unix/Linux Hash"),
-    (r"^\$sha1\$",                            "SHA-1 crypt / Juniper NetBSD sha1crypt ($sha1$)",         "Unix/Linux Hash"),
-    (r"^[a-z0-9./]{13}$",                     "crypt(3) DES (traditional Unix) — hashcat 1500",         "Unix/Linux Hash"),
-    (r"^_[./0-9A-Za-z]{19}$",                "BSDi Crypt / Extended DES — hashcat 12400",               "Unix/Linux Hash"),
-    (r"^\$racf\$\*",                          "RACF — hashcat 8500",                                    "Unix/Linux Hash"),
-    (r"^\$racf-kdfaes\$\*",                   "RACF KDFAES — hashcat 14200",                            "Unix/Linux Hash"),
-    (r"^\$as400\$des\$",                      "AS/400 DES — hashcat 8501",                              "Unix/Linux Hash"),
-    (r"^\$as400\$ssha1\$",                    "AS/400 SSHA1 — hashcat 35200",                           "Unix/Linux Hash"),
-
+    (r"^\$1\$.{1,8}\$",                         "md5crypt / Unix MD5 crypt / Cisco-IOS $1$ — hashcat 500","Unix/Linux Hash"),
+    (r"^\$5\$",                                 "sha256crypt / Unix SHA-256 crypt ($5$)",                 "Unix/Linux Hash"),
+    (r"^\$6\$",                                 "sha512crypt / Unix SHA-512 crypt ($6$)",                 "Unix/Linux Hash"),
+    (r"^\$sm3\$",                               "sm3crypt / SM3 Unix ($sm3$)",                            "Unix/Linux Hash"),
+    (r"^\$md5",                                 "SunMD5 crypt",                                          "Unix/Linux Hash"),
+    (r"^\$sha1\$",                              "SHA-1 crypt / Juniper NetBSD sha1crypt ($sha1$)",        "Unix/Linux Hash"),
+    (r"^[a-z0-9./]{13}$",                       "crypt(3) DES (traditional Unix) — hashcat 1500",        "Unix/Linux Hash"),
+    (r"^_[./0-9A-Za-z]{19}$",                   "BSDi Crypt / Extended DES — hashcat 12400",              "Unix/Linux Hash"),
+    (r"^\$racf\$\*",                            "RACF — hashcat 8500",                                   "Unix/Linux Hash"),
+    (r"^\$racf-kdfaes\$\*",                     "RACF KDFAES — hashcat 14200",                           "Unix/Linux Hash"),
+    (r"^\$as400\$des\$",                        "AS/400 DES — hashcat 8501",                             "Unix/Linux Hash"),
+    (r"^\$as400\$ssha1\$",                      "AS/400 SSHA1 — hashcat 35200",                          "Unix/Linux Hash"),
     # ── AIX ───────────────────────────────────────────────────────────────────
-    (r"^\{smd5\}",                            "AIX {smd5} — hashcat 6300",                              "Unix/Linux Hash"),
-    (r"^\{ssha256\}",                         "AIX {ssha256} — hashcat 6400",                           "Unix/Linux Hash"),
-    (r"^\{ssha512\}",                         "AIX {ssha512} — hashcat 6500",                           "Unix/Linux Hash"),
-    (r"^\{ssha1\}",                           "AIX {ssha1} — hashcat 6700",                             "Unix/Linux Hash"),
-
+    (r"^\{smd5\}",                              "AIX {smd5} — hashcat 6300",                             "Unix/Linux Hash"),
+    (r"^\{ssha256\}",                           "AIX {ssha256} — hashcat 6400",                          "Unix/Linux Hash"),
+    (r"^\{ssha512\}",                           "AIX {ssha512} — hashcat 6500",                          "Unix/Linux Hash"),
+    (r"^\{ssha1\}",                             "AIX {ssha1} — hashcat 6700",                            "Unix/Linux Hash"),
     # ── QNX ──────────────────────────────────────────────────────────────────
-    (r"^@m@",                                 "QNX /etc/shadow MD5 — hashcat 19000",                    "Unix/Linux Hash"),
-    (r"^@s@",                                 "QNX /etc/shadow SHA256 — hashcat 19100",                  "Unix/Linux Hash"),
-    (r"^@S@",                                 "QNX /etc/shadow SHA512 — hashcat 19200",                  "Unix/Linux Hash"),
-
+    (r"^@m@",                                   "QNX /etc/shadow MD5 — hashcat 19000",                   "Unix/Linux Hash"),
+    (r"^@s@",                                   "QNX /etc/shadow SHA256 — hashcat 19100",                 "Unix/Linux Hash"),
+    (r"^@S@",                                   "QNX /etc/shadow SHA512 — hashcat 19200",                 "Unix/Linux Hash"),
     # ── Windows ───────────────────────────────────────────────────────────────
-    (r"^\$DCC2\$",                            "Domain Cached Credentials 2 (DCC2) / MS Cache 2 — hashcat 2100", "Windows"),
-    (r"^\$WINHELLO\$",                        "Windows Hello PIN/Password — hashcat 28100",              "Windows"),
-    (r"^\$DPAPImk\$1\*",                      "DPAPI masterkey v1 — hashcat 15300/15310",                "Windows"),
-    (r"^\$DPAPImk\$2\*",                      "DPAPI masterkey v2 — hashcat 15900/15910",                "Windows"),
-    (r"^v1;PPH1_MD4,",                        "MS-AzureSync PBKDF2-HMAC-SHA256 — hashcat 12800",         "Windows"),
-    (r"^\$MSONLINEACCOUNT\$",                 "Microsoft Online Account PBKDF2+AES256 — hashcat 33700",  "Windows"),
-
+    (r"^\$DCC2\$",                              "Domain Cached Credentials 2 (DCC2) / MS Cache 2 — hashcat 2100","Windows"),
+    (r"^\$WINHELLO\$",                          "Windows Hello PIN/Password — hashcat 28100",             "Windows"),
+    (r"^\$DPAPImk\$1\*",                        "DPAPI masterkey v1 — hashcat 15300/15310",               "Windows"),
+    (r"^\$DPAPImk\$2\*",                        "DPAPI masterkey v2 — hashcat 15900/15910",               "Windows"),
+    (r"^v1;PPH1_MD4,",                          "MS-AzureSync PBKDF2-HMAC-SHA256 — hashcat 12800",        "Windows"),
+    (r"^\$MSONLINEACCOUNT\$",                   "Microsoft Online Account PBKDF2+AES256 — hashcat 33700", "Windows"),
     # ── Network protocols ─────────────────────────────────────────────────────
-    (r"^::.*:[a-f0-9]{48}:[a-f0-9]{48}:",    "NetNTLMv1 / NetNTLMv1+ESS — hashcat 5500",               "Network Protocol"),
-    (r"^[^:]+::[^:]+:[a-f0-9]{16}:[a-f0-9]{32}:0101", "NetNTLMv2 — hashcat 5600",                      "Network Protocol"),
-    (r"^\$krb5pa\$23\$",                      "Kerberos 5, etype 23, AS-REQ Pre-Auth — hashcat 7500",   "Network Protocol"),
-    (r"^\$krb5tgs\$23\$",                     "Kerberos 5, etype 23, TGS-REP (Kerberoastable) — hashcat 13100", "Network Protocol"),
-    (r"^\$krb5asrep\$23\$",                   "Kerberos 5, etype 23, AS-REP (ASREPRoast) — hashcat 18200", "Network Protocol"),
-    (r"^\$krb5tgs\$17\$",                     "Kerberos 5, etype 17, TGS-REP — hashcat 19600",          "Network Protocol"),
-    (r"^\$krb5tgs\$18\$",                     "Kerberos 5, etype 18, TGS-REP — hashcat 19700",          "Network Protocol"),
-    (r"^\$krb5pa\$17\$",                      "Kerberos 5, etype 17, Pre-Auth — hashcat 19800",         "Network Protocol"),
-    (r"^\$krb5pa\$18\$",                      "Kerberos 5, etype 18, Pre-Auth — hashcat 19900",         "Network Protocol"),
-    (r"^\$krb5asrep\$17\$",                   "Kerberos 5, etype 17, AS-REP — hashcat 32100",           "Network Protocol"),
-    (r"^\$krb5asrep\$18\$",                   "Kerberos 5, etype 18, AS-REP — hashcat 32200",           "Network Protocol"),
-    (r"^\$krb5db\$17\$",                      "Kerberos 5, etype 17, DB — hashcat 28800",               "Network Protocol"),
-    (r"^\$krb5db\$18\$",                      "Kerberos 5, etype 18, DB — hashcat 28900",               "Network Protocol"),
-    (r"^\$SNMPv3\$[0-6]\$",                   "SNMPv3 HMAC (various algorithms) — hashcat 25000-27300", "Network Protocol"),
-    (r"^\$cram_md5\$",                        "CRAM-MD5 — hashcat 10200",                               "Network Protocol"),
-    (r"^\{CRAM-MD5\}",                        "CRAM-MD5 Dovecot — hashcat 16400",                       "Network Protocol"),
-    (r"^\$sip\$\*",                           "SIP digest authentication MD5 — hashcat 11400",          "Network Protocol"),
-    (r"^\$tacacs-plus\$",                     "TACACS+ — hashcat 16100",                                "Network Protocol"),
-    (r"^\$sntp-ms\$",                         "MS SNTP — hashcat 31300",                                "Network Protocol"),
-    (r"^\$AWS-Sig-v4\$",                      "Amazon AWS Signature Version 4 — hashcat 28700",         "Network Protocol"),
-    (r"^WPA\*0[01]\*",                        "WPA-PBKDF2/PMK-PMKID+EAPOL — hashcat 22000/22001",       "Network Protocol"),
-    (r"^eyJ[A-Za-z0-9+/_-]",                  "JWT (JSON Web Token) — hashcat 16500",                   "Network Protocol"),
-    (r"^mojolicious=eyJ",                     "Perl Mojolicious session cookie HMAC-SHA256 — hashcat 16501", "Network Protocol"),
-    (r"^pi[a-z0-9]{24}:\..*:[0-9]+:[0-9]+$", "DNSSEC (NSEC3) — hashcat 8300",                          "Network Protocol"),
-    (r"^\$knx-ip-secure",                     "KNX IP Secure Device Authentication — hashcat 25900",    "Network Protocol"),
+    (r"^::.*:[a-f0-9]{48}:[a-f0-9]{48}:",       "NetNTLMv1 / NetNTLMv1+ESS — hashcat 5500",              "Network Protocol"),
+    (r"^[^:]+::[^:]+:[a-f0-9]{16}:[a-f0-9]{32}:0101","NetNTLMv2 — hashcat 5600",                         "Network Protocol"),
+    (r"^\$krb5pa\$23\$",                        "Kerberos 5, etype 23, AS-REQ Pre-Auth — hashcat 7500",  "Network Protocol"),
+    (r"^\$krb5tgs\$23\$",                       "Kerberos 5, etype 23, TGS-REP (Kerberoastable) — hashcat 13100","Network Protocol"),
+    (r"^\$krb5asrep\$23\$",                     "Kerberos 5, etype 23, AS-REP (ASREPRoast) — hashcat 18200","Network Protocol"),
+    (r"^\$krb5tgs\$17\$",                       "Kerberos 5, etype 17, TGS-REP — hashcat 19600",         "Network Protocol"),
+    (r"^\$krb5tgs\$18\$",                       "Kerberos 5, etype 18, TGS-REP — hashcat 19700",         "Network Protocol"),
+    (r"^\$krb5pa\$17\$",                        "Kerberos 5, etype 17, Pre-Auth — hashcat 19800",        "Network Protocol"),
+    (r"^\$krb5pa\$18\$",                        "Kerberos 5, etype 18, Pre-Auth — hashcat 19900",        "Network Protocol"),
+    (r"^\$krb5asrep\$17\$",                     "Kerberos 5, etype 17, AS-REP — hashcat 32100",          "Network Protocol"),
+    (r"^\$krb5asrep\$18\$",                     "Kerberos 5, etype 18, AS-REP — hashcat 32200",          "Network Protocol"),
+    (r"^\$krb5db\$17\$",                        "Kerberos 5, etype 17, DB — hashcat 28800",              "Network Protocol"),
+    (r"^\$krb5db\$18\$",                        "Kerberos 5, etype 18, DB — hashcat 28900",              "Network Protocol"),
+    (r"^\$SNMPv3\$[0-6]\$",                     "SNMPv3 HMAC (various algorithms) — hashcat 25000-27300","Network Protocol"),
+    (r"^\$cram_md5\$",                          "CRAM-MD5 — hashcat 10200",                              "Network Protocol"),
+    (r"^\{CRAM-MD5\}",                          "CRAM-MD5 Dovecot — hashcat 16400",                      "Network Protocol"),
+    (r"^\$sip\$\*",                             "SIP digest authentication MD5 — hashcat 11400",         "Network Protocol"),
+    (r"^\$tacacs-plus\$",                       "TACACS+ — hashcat 16100",                               "Network Protocol"),
+    (r"^\$sntp-ms\$",                           "MS SNTP — hashcat 31300",                               "Network Protocol"),
+    (r"^\$AWS-Sig-v4\$",                        "Amazon AWS Signature Version 4 — hashcat 28700",        "Network Protocol"),
+    (r"^WPA\*0[01]\*",                          "WPA-PBKDF2/PMK-PMKID+EAPOL — hashcat 22000/22001",      "Network Protocol"),
+    (r"^eyJ[A-Za-z0-9+/_-]",                    "JWT (JSON Web Token) — hashcat 16500",                  "Network Protocol"),
+    (r"^mojolicious=eyJ",                       "Perl Mojolicious session cookie HMAC-SHA256 — hashcat 16501","Network Protocol"),
+    (r"^pi[a-z0-9]{24}:\..*:[0-9]+:[0-9]+$",   "DNSSEC (NSEC3) — hashcat 8300",                         "Network Protocol"),
+    (r"^\$knx-ip-secure",                       "KNX IP Secure Device Authentication — hashcat 25900",   "Network Protocol"),
     (r"^\$flask\$|^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$",
-                                               "Flask Session Cookie or JWT-like token",                  "Network Protocol"),
-
+                                                "Flask Session Cookie or JWT-like token",                 "Network Protocol"),
     # ── Episerver ─────────────────────────────────────────────────────────────
-    (r"^\$episerver\$\*0\*",                  "Episerver 6.x < .NET 4 (SHA-1) — hashcat 141",           "Application"),
-    (r"^\$episerver\$\*1\*",                  "Episerver 6.x >= .NET 4 (SHA-256) — hashcat 1441",       "Application"),
-
+    (r"^\$episerver\$\*0\*",                    "Episerver 6.x < .NET 4 (SHA-1) — hashcat 141",          "Application"),
+    (r"^\$episerver\$\*1\*",                    "Episerver 6.x >= .NET 4 (SHA-256) — hashcat 1441",      "Application"),
     # ── Missing application prefixes ────────────────────────────────────────
     (r"^nKjiFErqK7|^[A-Za-z0-9+/]{30}:[0-9]{8}$",
-                                               "Juniper NetScreen/SSG ScreenOS — hashcat 22",            "Operating System"),
-    (r"^d[0-9a-f]{32}:[0-9]{7}$",             "Skype (MD5 HMAC embedded salt) — hashcat 23",             "Instant Messaging"),
-    (r"^[A-Za-z0-9+/]{22}==$",               "PeopleSoft SHA-1 base64 — hashcat 133",                   "Enterprise App"),
+                                                "Juniper NetScreen/SSG ScreenOS — hashcat 22",            "Operating System"),
+    (r"^d[0-9a-f]{32}:[0-9]{7}$",              "Skype (MD5 HMAC embedded salt) — hashcat 23",            "Instant Messaging"),
+    (r"^[A-Za-z0-9+/]{22}==$",                 "PeopleSoft SHA-1 base64 — hashcat 133",                  "Enterprise App"),
     (r"^\$cram_md5\$[A-Za-z0-9+/=]+\$[a-f0-9]{32}$",
-                                               "CRAM-MD5 (generic) — hashcat 10200",                     "Network Protocol"),
-    (r"^\{CRAM-MD5\}[a-f0-9]{64}",          "CRAM-MD5 Dovecot — hashcat 16400",                       "Network Protocol"),
-    (r"^\$diskcryptor\$0\*",               "DiskCryptor SHA512+XTS — hashcat 20011-20013",             "FDE"),
-    (r"^\$WPA\*0[01]\*|^WPA\*0[01]\*",  "WPA-PBKDF2/PMK-PMKID+EAPOL — hashcat 22000/22001",       "Network Protocol"),
-    (r"^\$SNMPv3\$0\$",                   "SNMPv3 HMAC-MD5-96/SHA1-96 combined — hashcat 25000",     "Network Protocol"),
-    (r"^\$SNMPv3\$1\$",                   "SNMPv3 HMAC-MD5-96 — hashcat 25100",                      "Network Protocol"),
-    (r"^\$SNMPv3\$2\$",                   "SNMPv3 HMAC-SHA1-96 — hashcat 25200",                     "Network Protocol"),
-    (r"^\$SNMPv3\$3\$",                   "SNMPv3 HMAC-SHA224-128 — hashcat 26700",                  "Network Protocol"),
-    (r"^\$SNMPv3\$4\$",                   "SNMPv3 HMAC-SHA256-192 — hashcat 26800",                  "Network Protocol"),
-    (r"^\$SNMPv3\$5\$",                   "SNMPv3 HMAC-SHA384-256 — hashcat 26900",                  "Network Protocol"),
-    (r"^\$SNMPv3\$6\$",                   "SNMPv3 HMAC-SHA512-384 — hashcat 27300",                  "Network Protocol"),
-    (r"^\$bcrypt-sha256\$",               "bcrypt(HMAC-SHA256($pass)) — passlib — hashcat 30601",     "Password KDF"),
-    (r"^\$2[ab]\$[0-9]{2}\$hashcat",     "WBB4 bcrypt(bcrypt) — hashcat 33800",                     "Application"),
-    (r"^\$MSONLINEACCOUNT\$0\$",         "Microsoft Online Account PBKDF2+AES256 — hashcat 33700",   "Windows"),
-    (r"^\$bisq\$[0-9]\*",               "Bisq .wallet scrypt — hashcat 29800",                       "Cryptocurrency"),
-    (r"^\$dogechain\$0\*",              "Dogechain.info Wallet — hashcat 32500",                     "Cryptocurrency"),
+                                                "CRAM-MD5 (generic) — hashcat 10200",                     "Network Protocol"),
+    (r"^\{CRAM-MD5\}[a-f0-9]{64}",             "CRAM-MD5 Dovecot — hashcat 16400",                      "Network Protocol"),
+    (r"^\$diskcryptor\$0\*",                    "DiskCryptor SHA512+XTS — hashcat 20011-20013",           "FDE"),
+    (r"^\$WPA\*0[01]\*|^WPA\*0[01]\*",         "WPA-PBKDF2/PMK-PMKID+EAPOL — hashcat 22000/22001",      "Network Protocol"),
+    (r"^\$SNMPv3\$0\$",                         "SNMPv3 HMAC-MD5-96/SHA1-96 combined — hashcat 25000",   "Network Protocol"),
+    (r"^\$SNMPv3\$1\$",                         "SNMPv3 HMAC-MD5-96 — hashcat 25100",                    "Network Protocol"),
+    (r"^\$SNMPv3\$2\$",                         "SNMPv3 HMAC-SHA1-96 — hashcat 25200",                   "Network Protocol"),
+    (r"^\$SNMPv3\$3\$",                         "SNMPv3 HMAC-SHA224-128 — hashcat 26700",                "Network Protocol"),
+    (r"^\$SNMPv3\$4\$",                         "SNMPv3 HMAC-SHA256-192 — hashcat 26800",                "Network Protocol"),
+    (r"^\$SNMPv3\$5\$",                         "SNMPv3 HMAC-SHA384-256 — hashcat 26900",                "Network Protocol"),
+    (r"^\$SNMPv3\$6\$",                         "SNMPv3 HMAC-SHA512-384 — hashcat 27300",                "Network Protocol"),
+    (r"^\$bcrypt-sha256\$",                     "bcrypt(HMAC-SHA256($pass)) — passlib — hashcat 30601",   "Password KDF"),
+    (r"^\$2[ab]\$[0-9]{2}\$hashcat",            "WBB4 bcrypt(bcrypt) — hashcat 33800",                   "Application"),
+    (r"^\$MSONLINEACCOUNT\$0\$",                "Microsoft Online Account PBKDF2+AES256 — hashcat 33700", "Windows"),
+    (r"^\$bisq\$[0-9]\*",                       "Bisq .wallet scrypt — hashcat 29800",                    "Cryptocurrency"),
+    (r"^\$dogechain\$0\*",                      "Dogechain.info Wallet — hashcat 32500",                  "Cryptocurrency"),
     (r"^\$terra\$|^[a-zA-Z0-9+/=]{80,}wZ",
-                                            "Terra Station Wallet AES256-CBC PBKDF2 — hashcat 29600",    "Cryptocurrency"),
-    (r"^sha256:[a-f0-9]+:[a-f0-9]{64}$",   "Anope IRC enc_sha256 — hashcat 30700",                     "Instant Messaging"),
-    (r"^\$xmpp-scram\$0\$",             "XMPP SCRAM PBKDF2-SHA1 — hashcat 23200",                   "Instant Messaging"),
-    (r"^f1eff5c0|^[a-f0-9]{24}$",          "PKZIP Master Key — hashcat 20500",                         "Archive"),
-    (r"^\$rc4\$40\$",                   "RC4 40-bit DropN — hashcat 33500",                         "Raw Cipher"),
-    (r"^\$rc4\$72\$",                   "RC4 72-bit DropN — hashcat 33501",                         "Raw Cipher"),
-    (r"^\$rc4\$104\$",                  "RC4 104-bit DropN — hashcat 33502",                        "Raw Cipher"),
-    (r"^\$chacha20\$\*",               "ChaCha20 — hashcat 15400",                                  "Raw Cipher"),
+                                                "Terra Station Wallet AES256-CBC PBKDF2 — hashcat 29600", "Cryptocurrency"),
+    (r"^sha256:[a-f0-9]+:[a-f0-9]{64}$",        "Anope IRC enc_sha256 — hashcat 30700",                   "Instant Messaging"),
+    (r"^\$xmpp-scram\$0\$",                     "XMPP SCRAM PBKDF2-SHA1 — hashcat 23200",                "Instant Messaging"),
+    (r"^f1eff5c0|^[a-f0-9]{24}$",               "PKZIP Master Key — hashcat 20500",                       "Archive"),
+    (r"^\$rc4\$40\$",                           "RC4 40-bit DropN — hashcat 33500",                      "Raw Cipher"),
+    (r"^\$rc4\$72\$",                           "RC4 72-bit DropN — hashcat 33501",                      "Raw Cipher"),
+    (r"^\$rc4\$104\$",                          "RC4 104-bit DropN — hashcat 33502",                     "Raw Cipher"),
+    (r"^\$chacha20\$\*",                        "ChaCha20 — hashcat 15400",                               "Raw Cipher"),
     (r"^md5\$[a-zA-Z0-9]+\$[a-f0-9]{32}$",
-                                            "Python Werkzeug MD5 (HMAC-MD5) — hashcat 30000",            "Application"),
+                                                "Python Werkzeug MD5 (HMAC-MD5) — hashcat 30000",         "Application"),
     (r"^sha256\$[a-zA-Z0-9]+\$[a-f0-9]{64}$",
-                                            "Python Werkzeug SHA256 (HMAC-SHA256) — hashcat 30120",      "Application"),
+                                                "Python Werkzeug SHA256 (HMAC-SHA256) — hashcat 30120",   "Application"),
     (r"^sha256:[a-f0-9]{64}:[a-f0-9]{64}$",
-                                            "Anope IRC enc_sha256 (alt fmt) — hashcat 30700",            "Instant Messaging"),
-    (r"^\$knx-ip-secure-device",          "KNX IP Secure Device Authentication — hashcat 25900",       "Network Protocol"),
-    (r"^\$ASN\$\*[12]\*",             "Apple Secure Notes — hashcat 16200",                        "Document"),
-    (r"^\$vbk\$\*",                    "Veeam VBK — hashcat 31200",                                 "Archive"),
-    (r"^\$kgb\$",                        "Kremlin Encrypt 3.0 / NewDES — hashcat 32700",              "Archive"),
-    (r"^\$mobilekeychain\$31800",        "1Password mobilekeychain v8 — hashcat 31800",               "Password Manager"),
-    (r"^PBKDF1:sha1:",                     "PBKDF1-SHA1 — hashcat 32900",                              "Password KDF"),
+                                                "Anope IRC enc_sha256 (alt fmt) — hashcat 30700",         "Instant Messaging"),
+    (r"^\$knx-ip-secure-device",                "KNX IP Secure Device Authentication — hashcat 25900",   "Network Protocol"),
+    (r"^\$ASN\$\*[12]\*",                       "Apple Secure Notes — hashcat 16200",                    "Document"),
+    (r"^\$vbk\$\*",                             "Veeam VBK — hashcat 31200",                              "Archive"),
+    (r"^\$kgb\$",                               "Kremlin Encrypt 3.0 / NewDES — hashcat 32700",           "Archive"),
+    (r"^\$mobilekeychain\$31800",               "1Password mobilekeychain v8 — hashcat 31800",            "Password Manager"),
+    (r"^PBKDF1:sha1:",                          "PBKDF1-SHA1 — hashcat 32900",                            "Password KDF"),
     (r"^\$pbkdf2-hmac-sha1\$[0-9]+\$[A-Za-z0-9+/=]+\.[a-f0-9]+",
-                                            "NetIQ SSPR PBKDF2WithHmacSHA1 — hashcat 32050",            "Enterprise App"),
+                                                "NetIQ SSPR PBKDF2WithHmacSHA1 — hashcat 32050",          "Enterprise App"),
     (r"^\$pbkdf2-sha256\$[0-9]+\$[A-Za-z0-9]+\$",
-                                            "NetIQ SSPR PBKDF2WithHmacSHA256 — hashcat 32060",          "Enterprise App"),
+                                                "NetIQ SSPR PBKDF2WithHmacSHA256 — hashcat 32060",        "Enterprise App"),
     (r"^\$pbkdf2-hmac-sha512\$[0-9]+\.[0-9]+",
-                                            "NetIQ SSPR PBKDF2WithHmacSHA512 — hashcat 32070",          "Enterprise App"),
+                                                "NetIQ SSPR PBKDF2WithHmacSHA512 — hashcat 32070",        "Enterprise App"),
     (r"^\$sspr\$[0-4]\$[0-9]+\$NONE\$",
-                                            "NetIQ SSPR (no salt) — hashcat 32000/32010",               "Enterprise App"),
+                                                "NetIQ SSPR (no salt) — hashcat 32000/32010",             "Enterprise App"),
     (r"^\$sspr\$[0-4]\$[0-9]+\$[A-Za-z0-9+/=]+\$",
-                                            "NetIQ SSPR / Adobe AEM (salted) — hashcat 32020-32041",    "Enterprise App"),
-    (r"^SQLCIPHER\*[12]\*",             "SQLCipher — hashcat 24600",                                 "Database"),
-    (r"^\$diskcryptor\$",               "DiskCryptor SHA512+XTS — hashcat 20011-20013",              "FDE"),
-    (r"^\$vmx\$0\$",                   "VMware VMX PBKDF2+AES-256-CBC — hashcat 27400",             "FDE"),
-    (r"^\$vbox\$0\$",                  "VirtualBox PBKDF2+AES-XTS — hashcat 27500/27600",           "FDE"),
-    (r"^\$luks\$1\$sha1\$",           "LUKS v1 SHA-1 — hashcat 29511-29513",                      "FDE"),
-    (r"^\$luks\$1\$sha256\$",         "LUKS v1 SHA-256 — hashcat 29521-29523",                    "FDE"),
-    (r"^\$luks\$1\$sha512\$",         "LUKS v1 SHA-512 — hashcat 29531-29533",                    "FDE"),
-    (r"^\$luks\$1\$ripemd160\$",      "LUKS v1 RIPEMD-160 — hashcat 29541-29543",                 "FDE"),
-    (r"^\$luks\$2\$argon2",            "LUKS v2 argon2 — hashcat 34100",                           "FDE"),
-    (r"^\$truecrypt\$",                 "TrueCrypt XTS — hashcat 29311-29343",                       "FDE"),
-    (r"^\$veracrypt\$",                 "VeraCrypt XTS — hashcat 29411-29483",                       "FDE"),
-    (r"^\$keepass\$\*2\*",            "KeePass KDBX v2/v3 — hashcat 13400",                       "Password Manager"),
-    (r"^\$keepass\$\*4\*",            "KeePass KDBX v4 — hashcat 34300",                          "Password Manager"),
-    (r"^\$metamask\$",                  "MetaMask Desktop Wallet — hashcat 26600",                   "Cryptocurrency"),
-    (r"^\$metamask-short\$",            "MetaMask Desktop Wallet (short) — hashcat 26610",           "Cryptocurrency"),
-    (r"^\$metamaskMobile\$",            "MetaMask Mobile Wallet — hashcat 31900",                    "Cryptocurrency"),
-    (r"^\$multibit\$1\*",              "MultiBit Classic .key MD5 — hashcat 22500",                 "Cryptocurrency"),
-    (r"^\$multibit\$2\*",              "MultiBit HD scrypt — hashcat 22700",                        "Cryptocurrency"),
-    (r"^\$multibit\$3\*",              "MultiBit Classic .wallet scrypt — hashcat 27700",           "Cryptocurrency"),
-    (r"^\$stellar\$",                   "Stargazer Stellar XLM — hashcat 25500",                     "Cryptocurrency"),
-    (r"^EXODUS:",                          "Exodus Desktop Wallet scrypt — hashcat 28200",              "Cryptocurrency"),
-    (r"^\$sshng\$0\$",                 "RSA/DSA/EC/OpenSSH Private Key ($0$) — hashcat 22911",      "Private Key"),
-    (r"^\$sshng\$6\$",                 "RSA/DSA/EC/OpenSSH Private Key ($6$) — hashcat 22921",      "Private Key"),
-    (r"^\$sshng\$[13]\$",              "RSA/DSA/EC/OpenSSH Private Key ($1/$3$) — hashcat 22931",   "Private Key"),
-    (r"^\$sshng\$4\$",                 "RSA/DSA/EC/OpenSSH Private Key ($4$) — hashcat 22941",      "Private Key"),
-    (r"^\$sshng\$5\$",                 "RSA/DSA/EC/OpenSSH Private Key ($5$) — hashcat 22951",      "Private Key"),
-    (r"^\$gpg\$\*1\*",                "GPG AES/CAST5 encrypted key — hashcat 17010-17040",         "Private Key"),
-    (r"^\$PEM\$[12]\$",               "PKCS#8 Private Key PBKDF2 — hashcat 24410/24420",           "Private Key"),
-    (r"^\$jksprivk\$\*",              "JKS Java Key Store Private Keys — hashcat 15500",           "Private Key"),
-    (r"^\$bitcoin\$",                   "Bitcoin/Litecoin wallet.dat — hashcat 11300",               "Cryptocurrency"),
-    (r"^\$blockchain\$v2\$",           "Blockchain My Wallet V2 — hashcat 15200",                   "Cryptocurrency"),
-    (r"^\$blockchain\$269\$",          "Blockchain My Wallet (Legacy) — hashcat 34700",             "Cryptocurrency"),
-    (r"^\$blockchain\$[0-9]",           "Blockchain My Wallet — hashcat 12700",                      "Cryptocurrency"),
-    (r"^\$ethereum\$p\*",              "Ethereum PBKDF2-HMAC-SHA256 — hashcat 15600",               "Cryptocurrency"),
-    (r"^\$ethereum\$s\*",              "Ethereum SCRYPT — hashcat 15700",                           "Cryptocurrency"),
-    (r"^\$ethereum\$w\*",              "Ethereum Pre-Sale Wallet — hashcat 16300",                  "Cryptocurrency"),
-    (r"^\$electrum\$[1-3]\*",          "Electrum Wallet Salt-Type 1-3 — hashcat 16600",             "Cryptocurrency"),
-    (r"^\$electrum\$4\*",              "Electrum Wallet Salt-Type 4 — hashcat 21700",               "Cryptocurrency"),
-    (r"^\$electrum\$5\*",              "Electrum Wallet Salt-Type 5 — hashcat 21800",               "Cryptocurrency"),
-
+                                                "NetIQ SSPR / Adobe AEM (salted) — hashcat 32020-32041",  "Enterprise App"),
+    (r"^SQLCIPHER\*[12]\*",                     "SQLCipher — hashcat 24600",                              "Database"),
+    (r"^\$diskcryptor\$",                       "DiskCryptor SHA512+XTS — hashcat 20011-20013",           "FDE"),
+    (r"^\$vmx\$0\$",                            "VMware VMX PBKDF2+AES-256-CBC — hashcat 27400",          "FDE"),
+    (r"^\$vbox\$0\$",                           "VirtualBox PBKDF2+AES-XTS — hashcat 27500/27600",        "FDE"),
+    (r"^\$luks\$1\$sha1\$",                     "LUKS v1 SHA-1 — hashcat 29511-29513",                   "FDE"),
+    (r"^\$luks\$1\$sha256\$",                   "LUKS v1 SHA-256 — hashcat 29521-29523",                 "FDE"),
+    (r"^\$luks\$1\$sha512\$",                   "LUKS v1 SHA-512 — hashcat 29531-29533",                 "FDE"),
+    (r"^\$luks\$1\$ripemd160\$",                "LUKS v1 RIPEMD-160 — hashcat 29541-29543",              "FDE"),
+    (r"^\$luks\$2\$argon2",                     "LUKS v2 argon2 — hashcat 34100",                        "FDE"),
+    (r"^\$truecrypt\$",                         "TrueCrypt XTS — hashcat 29311-29343",                    "FDE"),
+    (r"^\$veracrypt\$",                         "VeraCrypt XTS — hashcat 29411-29483",                    "FDE"),
+    (r"^\$keepass\$\*2\*",                      "KeePass KDBX v2/v3 — hashcat 13400",                    "Password Manager"),
+    (r"^\$keepass\$\*4\*",                      "KeePass KDBX v4 — hashcat 34300",                       "Password Manager"),
+    (r"^\$metamask\$",                          "MetaMask Desktop Wallet — hashcat 26600",                "Cryptocurrency"),
+    (r"^\$metamask-short\$",                    "MetaMask Desktop Wallet (short) — hashcat 26610",        "Cryptocurrency"),
+    (r"^\$metamaskMobile\$",                    "MetaMask Mobile Wallet — hashcat 31900",                 "Cryptocurrency"),
+    (r"^\$multibit\$1\*",                       "MultiBit Classic .key MD5 — hashcat 22500",              "Cryptocurrency"),
+    (r"^\$multibit\$2\*",                       "MultiBit HD scrypt — hashcat 22700",                     "Cryptocurrency"),
+    (r"^\$multibit\$3\*",                       "MultiBit Classic .wallet scrypt — hashcat 27700",        "Cryptocurrency"),
+    (r"^\$stellar\$",                           "Stargazer Stellar XLM — hashcat 25500",                  "Cryptocurrency"),
+    (r"^EXODUS:",                               "Exodus Desktop Wallet scrypt — hashcat 28200",           "Cryptocurrency"),
+    (r"^\$sshng\$0\$",                          "RSA/DSA/EC/OpenSSH Private Key ($0$) — hashcat 22911",   "Private Key"),
+    (r"^\$sshng\$6\$",                          "RSA/DSA/EC/OpenSSH Private Key ($6$) — hashcat 22921",   "Private Key"),
+    (r"^\$sshng\$[13]\$",                       "RSA/DSA/EC/OpenSSH Private Key ($1/$3$) — hashcat 22931","Private Key"),
+    (r"^\$sshng\$4\$",                          "RSA/DSA/EC/OpenSSH Private Key ($4$) — hashcat 22941",   "Private Key"),
+    (r"^\$sshng\$5\$",                          "RSA/DSA/EC/OpenSSH Private Key ($5$) — hashcat 22951",   "Private Key"),
+    (r"^\$gpg\$\*1\*",                          "GPG AES/CAST5 encrypted key — hashcat 17010-17040",      "Private Key"),
+    (r"^\$PEM\$[12]\$",                         "PKCS#8 Private Key PBKDF2 — hashcat 24410/24420",        "Private Key"),
+    (r"^\$jksprivk\$\*",                        "JKS Java Key Store Private Keys — hashcat 15500",        "Private Key"),
+    (r"^\$bitcoin\$",                           "Bitcoin/Litecoin wallet.dat — hashcat 11300",            "Cryptocurrency"),
+    (r"^\$blockchain\$v2\$",                    "Blockchain My Wallet V2 — hashcat 15200",                "Cryptocurrency"),
+    (r"^\$blockchain\$269\$",                   "Blockchain My Wallet (Legacy) — hashcat 34700",          "Cryptocurrency"),
+    (r"^\$blockchain\$[0-9]",                   "Blockchain My Wallet — hashcat 12700",                   "Cryptocurrency"),
+    (r"^\$ethereum\$p\*",                       "Ethereum PBKDF2-HMAC-SHA256 — hashcat 15600",            "Cryptocurrency"),
+    (r"^\$ethereum\$s\*",                       "Ethereum SCRYPT — hashcat 15700",                        "Cryptocurrency"),
+    (r"^\$ethereum\$w\*",                       "Ethereum Pre-Sale Wallet — hashcat 16300",               "Cryptocurrency"),
+    (r"^\$electrum\$[1-3]\*",                   "Electrum Wallet Salt-Type 1-3 — hashcat 16600",          "Cryptocurrency"),
+    (r"^\$electrum\$4\*",                       "Electrum Wallet Salt-Type 4 — hashcat 21700",            "Cryptocurrency"),
+    (r"^\$electrum\$5\*",                       "Electrum Wallet Salt-Type 5 — hashcat 21800",            "Cryptocurrency"),
     # ── Application-specific ─────────────────────────────────────────────────
-    (r"^\$P\$.{31}$|^\$H\$.{31}$",           "WordPress / phpBB phpass — hashcat 400",                  "Application"),
-    (r"^\$S\$.{52}$",                         "Drupal 7 (Salted SHA-512) — hashcat 7900",                "Application"),
-    (r"^\$apr1\$",                            "Apache MD5 crypt ($apr1$) — hashcat 1600",                "Application"),
-    (r"^\{SHA\}",                             "LDAP SHA-1 / nsldap — hashcat 101",                      "Application"),
-    (r"^\{SSHA\}",                            "LDAP Salted SHA-1 / nsldaps — hashcat 111",               "Application"),
-    (r"^\{SSHA256\}",                         "LDAP Salted SHA-256 — hashcat 1411",                     "Application"),
-    (r"^\{SSHA512\}",                         "LDAP Salted SHA-512 — hashcat 1711",                     "Application"),
-    (r"^\{MD5\}",                             "LDAP MD5",                                               "Application"),
-    (r"^\{crypt\}",                           "LDAP crypt",                                             "Application"),
-    (r"^\{PBKDF2_SHA256\}",                   "RedHat 389-DS LDAP PBKDF2-HMAC-SHA256 — hashcat 10901",  "Application"),
-    (r"^\{x-issha,\s",                        "SAP CODVN H iSSHA-1 — hashcat 10300",                    "Application"),
-    (r"^\{x-isSHA512,\s",                     "SAP CODVN H isSHA512 — hashcat 35000",                   "Application"),
-    (r"^\{PKCS5S2\}",                         "Atlassian PBKDF2-HMAC-SHA1 — hashcat 12001",             "Application"),
-    (r"^\$PHPS\$",                            "PHPS — hashcat 2612",                                    "Application"),
-    (r"^\$B\$",                               "MediaWiki B type — hashcat 3711",                        "Application"),
-    (r"^sha1\$[a-f0-9]+\$[a-f0-9]{40}$",     "Django SHA-1 — hashcat 124",                             "Application"),
-    (r"^\$shiro1\$SHA-512\$",                 "Apache Shiro 1 SHA-512 — hashcat 12150",                 "Application"),
-    (r"^otm_sha256:",                         "Oracle Transportation Management SHA256 — hashcat 20600", "Application"),
-    (r"^\$SHA\$",                             "AuthMe sha256 — hashcat 20711",                          "Application"),
-    (r"^\$solarwinds\$0\$",                   "SolarWinds Orion — hashcat 21500",                       "Application"),
-    (r"^\$solarwinds\$1\$",                   "SolarWinds Orion v2 — hashcat 21501",                    "Application"),
-    (r"^\$radmin3\$",                         "Radmin3 — hashcat 29200",                                "Application"),
-    (r"^\$encdv-pbkdf2\$",                    "ENCsecurity Datavault PBKDF2 — hashcat 29910/29920",      "Application"),
-    (r"^\$encdv\$",                           "ENCsecurity Datavault MD5 — hashcat 29930/29940",         "Application"),
-    (r"^S:\"Config Passphrase\"=",            "SecureCRT MasterPassphrase v2 — hashcat 31400",           "Application"),
-    (r"^\$kgb\$",                             "Kremlin Encrypt 3.0 w/NewDES — hashcat 32700",            "Archive"),
-
+    (r"^\$P\$.{31}$|^\$H\$.{31}$",             "WordPress / phpBB phpass — hashcat 400",                 "Application"),
+    (r"^\$S\$.{52}$",                           "Drupal 7 (Salted SHA-512) — hashcat 7900",               "Application"),
+    (r"^\$apr1\$",                              "Apache MD5 crypt ($apr1$) — hashcat 1600",               "Application"),
+    (r"^\{SHA\}",                               "LDAP SHA-1 / nsldap — hashcat 101",                     "Application"),
+    (r"^\{SSHA\}",                              "LDAP Salted SHA-1 / nsldaps — hashcat 111",              "Application"),
+    (r"^\{SSHA256\}",                           "LDAP Salted SHA-256 — hashcat 1411",                    "Application"),
+    (r"^\{SSHA512\}",                           "LDAP Salted SHA-512 — hashcat 1711",                    "Application"),
+    (r"^\{MD5\}",                               "LDAP MD5",                                              "Application"),
+    (r"^\{crypt\}",                             "LDAP crypt",                                            "Application"),
+    (r"^\{PBKDF2_SHA256\}",                     "RedHat 389-DS LDAP PBKDF2-HMAC-SHA256 — hashcat 10901", "Application"),
+    (r"^\{x-issha,\s",                          "SAP CODVN H iSSHA-1 — hashcat 10300",                   "Application"),
+    (r"^\{x-isSHA512,\s",                       "SAP CODVN H isSHA512 — hashcat 35000",                  "Application"),
+    (r"^\{PKCS5S2\}",                           "Atlassian PBKDF2-HMAC-SHA1 — hashcat 12001",            "Application"),
+    (r"^\$PHPS\$",                              "PHPS — hashcat 2612",                                   "Application"),
+    (r"^\$B\$",                                 "MediaWiki B type — hashcat 3711",                       "Application"),
+    (r"^sha1\$[a-f0-9]+\$[a-f0-9]{40}$",       "Django SHA-1 — hashcat 124",                            "Application"),
+    (r"^\$shiro1\$SHA-512\$",                   "Apache Shiro 1 SHA-512 — hashcat 12150",                "Application"),
+    (r"^otm_sha256:",                           "Oracle Transportation Management SHA256 — hashcat 20600","Application"),
+    (r"^\$SHA\$",                               "AuthMe sha256 — hashcat 20711",                         "Application"),
+    (r"^\$solarwinds\$0\$",                     "SolarWinds Orion — hashcat 21500",                      "Application"),
+    (r"^\$solarwinds\$1\$",                     "SolarWinds Orion v2 — hashcat 21501",                   "Application"),
+    (r"^\$radmin3\$",                           "Radmin3 — hashcat 29200",                               "Application"),
+    (r"^\$encdv-pbkdf2\$",                      "ENCsecurity Datavault PBKDF2 — hashcat 29910/29920",     "Application"),
+    (r"^\$encdv\$",                             "ENCsecurity Datavault MD5 — hashcat 29930/29940",        "Application"),
+    (r"^S:\"Config Passphrase\"=",              "SecureCRT MasterPassphrase v2 — hashcat 31400",          "Application"),
+    (r"^\$kgb\$",                               "Kremlin Encrypt 3.0 w/NewDES — hashcat 32700",           "Archive"),
     # ── Database servers ─────────────────────────────────────────────────────
-    (r"^\*[a-f0-9]{40}$",                     "MySQL 4.1+ SHA-1 double hash — hashcat 300",              "Database"),
-    (r"^0x0100[a-f0-9]{88}$",                 "MSSQL 2000 — hashcat 131",                               "Database"),
-    (r"^0x0100[a-f0-9]{48}$",                 "MSSQL 2005 — hashcat 132",                               "Database"),
-    (r"^0x0200[a-f0-9]{136}$",                "MSSQL 2012/2014 — hashcat 1731",                         "Database"),
-    (r"^0x[a-f0-9]{40}$",                     "SQL Server HASHBYTES SHA-1 / Sybase ASE",                 "Database"),
-    (r"^0x[a-f0-9]{64}$",                     "SQL Server HASHBYTES SHA-256 — hashcat 1400",             "Database"),
-    (r"^S:[a-f0-9]{60}$",                     "Oracle 11g+ (S: type) — hashcat 112",                    "Database"),
-    (r"^\$postgres\$",                        "PostgreSQL CRAM-MD5 — hashcat 11100",                    "Database"),
-    (r"^\$mysqlna\$",                         "MySQL CRAM SHA1 — hashcat 11200",                        "Database"),
-    (r"^\$mysql\$A\$",                        "MySQL $A$ sha256crypt — hashcat 7401",                   "Database"),
-    (r"^SCRAM-SHA-256\$",                     "PostgreSQL SCRAM-SHA-256 — hashcat 28600",               "Database"),
-    (r"^\$mongodb-scram\$\*0\*",              "MongoDB SCRAM-SHA-1 — hashcat 24100",                    "Database"),
-    (r"^\$mongodb-scram\$\*1\*",              "MongoDB SCRAM-SHA-256 — hashcat 24200",                  "Database"),
-    (r"^\$xmpp-scram\$",                      "XMPP SCRAM PBKDF2-SHA1 — hashcat 23200",                 "Database"),
-    (r"^SQLCIPHER\*",                         "SQLCipher — hashcat 24600",                              "Database"),
-
+    (r"^\*[a-f0-9]{40}$",                       "MySQL 4.1+ SHA-1 double hash — hashcat 300",             "Database"),
+    (r"^0x0100[a-f0-9]{88}$",                   "MSSQL 2000 — hashcat 131",                              "Database"),
+    (r"^0x0100[a-f0-9]{48}$",                   "MSSQL 2005 — hashcat 132",                              "Database"),
+    (r"^0x0200[a-f0-9]{136}$",                  "MSSQL 2012/2014 — hashcat 1731",                        "Database"),
+    (r"^0x[a-f0-9]{40}$",                       "SQL Server HASHBYTES SHA-1 / Sybase ASE",               "Database"),
+    (r"^0x[a-f0-9]{64}$",                       "SQL Server HASHBYTES SHA-256 — hashcat 1400",           "Database"),
+    (r"^S:[a-f0-9]{60}$",                       "Oracle 11g+ (S: type) — hashcat 112",                   "Database"),
+    (r"^\$postgres\$",                          "PostgreSQL CRAM-MD5 — hashcat 11100",                   "Database"),
+    (r"^\$mysqlna\$",                           "MySQL CRAM SHA1 — hashcat 11200",                       "Database"),
+    (r"^\$mysql\$A\$",                          "MySQL $A$ sha256crypt — hashcat 7401",                  "Database"),
+    (r"^SCRAM-SHA-256\$",                       "PostgreSQL SCRAM-SHA-256 — hashcat 28600",              "Database"),
+    (r"^\$mongodb-scram\$\*0\*",                "MongoDB SCRAM-SHA-1 — hashcat 24100",                   "Database"),
+    (r"^\$mongodb-scram\$\*1\*",                "MongoDB SCRAM-SHA-256 — hashcat 24200",                 "Database"),
+    (r"^\$xmpp-scram\$",                        "XMPP SCRAM PBKDF2-SHA1 — hashcat 23200",               "Database"),
+    (r"^SQLCIPHER\*",                           "SQLCipher — hashcat 24600",                             "Database"),
     # ── Enterprise applications ───────────────────────────────────────────────
-    (r"^[0-9]{6,12}\$[A-F0-9]{14}$",          "SAP CODVN B (BCODE) — hashcat 7700/7701",                "Enterprise App"),
-    (r"^[0-9]{6,12}\$[A-F0-9]{40}$",          "SAP CODVN F/G (PASSCODE) — hashcat 7800/7801",           "Enterprise App"),
-    (r"^\$sspr\$[0-4]\$",                     "NetIQ SSPR / Adobe AEM — hashcat 32000-32041",            "Enterprise App"),
-    (r"^\$pbkdf2-hmac-sha1\$",                "NetIQ SSPR PBKDF2WithHmacSHA1 — hashcat 32050",           "Enterprise App"),
-    (r"^\$pbkdf2-hmac-sha512\$",              "NetIQ SSPR PBKDF2WithHmacSHA512 — hashcat 32070",         "Enterprise App"),
-
+    (r"^[0-9]{6,12}\$[A-F0-9]{14}$",            "SAP CODVN B (BCODE) — hashcat 7700/7701",               "Enterprise App"),
+    (r"^[0-9]{6,12}\$[A-F0-9]{40}$",            "SAP CODVN F/G (PASSCODE) — hashcat 7800/7801",          "Enterprise App"),
+    (r"^\$sspr\$[0-4]\$",                       "NetIQ SSPR / Adobe AEM — hashcat 32000-32041",           "Enterprise App"),
+    (r"^\$pbkdf2-hmac-sha1\$",                  "NetIQ SSPR PBKDF2WithHmacSHA1 — hashcat 32050",          "Enterprise App"),
+    (r"^\$pbkdf2-hmac-sha512\$",                "NetIQ SSPR PBKDF2WithHmacSHA512 — hashcat 32070",        "Enterprise App"),
     # ── GOST ─────────────────────────────────────────────────────────────────
-    (r"^\$gost\$",                            "GOST R 34.11-94 crypt",                                   "GOST Family"),
-
+    (r"^\$gost\$",                              "GOST R 34.11-94 crypt",                                  "GOST Family"),
     # ── Operating system / device specific ───────────────────────────────────
-    (r"^\$fde\$",                             "Android FDE — hashcat 8800",                              "Mobile"),
-    (r"^\$uido\$",                            "iPhone passcode (UID key + System Keybag) — hashcat 26500", "Mobile"),
-    (r"^\$ml\$",                              "macOS v10.8+ PBKDF2-SHA512 — hashcat 7100",               "Operating System"),
-    (r"^grub\.pbkdf2\.sha512\.",              "GRUB 2 — hashcat 7200",                                   "Operating System"),
-    (r"^\$8\$",                               "Cisco-IOS $8$ PBKDF2-SHA256 — hashcat 9200",              "Operating System"),
-    (r"^\$9\$",                               "Cisco-IOS $9$ scrypt — hashcat 9300",                    "Operating System"),
-
+    (r"^\$fde\$",                               "Android FDE — hashcat 8800",                             "Mobile"),
+    (r"^\$uido\$",                              "iPhone passcode (UID key + System Keybag) — hashcat 26500","Mobile"),
+    (r"^\$ml\$",                                "macOS v10.8+ PBKDF2-SHA512 — hashcat 7100",              "Operating System"),
+    (r"^grub\.pbkdf2\.sha512\.",                "GRUB 2 — hashcat 7200",                                  "Operating System"),
+    (r"^\$8\$",                                 "Cisco-IOS $8$ PBKDF2-SHA256 — hashcat 9200",             "Operating System"),
+    (r"^\$9\$",                                 "Cisco-IOS $9$ scrypt — hashcat 9300",                   "Operating System"),
     # ── Full-Disk Encryption ─────────────────────────────────────────────────
-    (r"^\$bitlocker\$",                       "BitLocker — hashcat 22100",                               "FDE"),
-    (r"^\$fvde\$1\$",                         "FileVault 2 — hashcat 16700",                             "FDE"),
-    (r"^\$fvde\$2\$",                         "Apple APFS — hashcat 18300",                              "FDE"),
-    (r"^\$ecryptfs\$",                        "eCryptfs — hashcat 12200",                                "FDE"),
-    (r"^\$luks\$1\$",                         "LUKS v1 — hashcat 29511-29543",                           "FDE"),
-    (r"^\$luks\$2\$",                         "LUKS v2 — hashcat 34100",                                 "FDE"),
-    (r"^\$bcve\$",                            "BestCrypt Volume Encryption — hashcat 23900/24000",        "FDE"),
-    (r"^\$diskcryptor\$",                     "DiskCryptor — hashcat 20011-20013",                       "FDE"),
-    (r"^\$aescrypt\$",                        "AES Crypt SHA256 — hashcat 22400",                        "FDE"),
-    (r"^\$vmx\$",                             "VMware VMX PBKDF2+AES-256-CBC — hashcat 27400",           "FDE"),
-    (r"^\$vbox\$",                            "VirtualBox PBKDF2+AES-XTS — hashcat 27500/27600",         "FDE"),
-    (r"^\$truecrypt\$",                       "TrueCrypt XTS — hashcat 29311-29343",                     "FDE"),
-    (r"^\$veracrypt\$",                       "VeraCrypt XTS — hashcat 29411-29483",                     "FDE"),
-
+    (r"^\$bitlocker\$",                         "BitLocker — hashcat 22100",                              "FDE"),
+    (r"^\$fvde\$1\$",                           "FileVault 2 — hashcat 16700",                            "FDE"),
+    (r"^\$fvde\$2\$",                           "Apple APFS — hashcat 18300",                             "FDE"),
+    (r"^\$ecryptfs\$",                          "eCryptfs — hashcat 12200",                               "FDE"),
+    (r"^\$luks\$1\$",                           "LUKS v1 — hashcat 29511-29543",                          "FDE"),
+    (r"^\$luks\$2\$",                           "LUKS v2 — hashcat 34100",                                "FDE"),
+    (r"^\$bcve\$",                              "BestCrypt Volume Encryption — hashcat 23900/24000",       "FDE"),
+    (r"^\$diskcryptor\$",                       "DiskCryptor — hashcat 20011-20013",                      "FDE"),
+    (r"^\$aescrypt\$",                          "AES Crypt SHA256 — hashcat 22400",                       "FDE"),
+    (r"^\$vmx\$",                               "VMware VMX PBKDF2+AES-256-CBC — hashcat 27400",          "FDE"),
+    (r"^\$vbox\$",                              "VirtualBox PBKDF2+AES-XTS — hashcat 27500/27600",        "FDE"),
+    (r"^\$truecrypt\$",                         "TrueCrypt XTS — hashcat 29311-29343",                    "FDE"),
+    (r"^\$veracrypt\$",                         "VeraCrypt XTS — hashcat 29411-29483",                    "FDE"),
     # ── Archives ─────────────────────────────────────────────────────────────
-    (r"^\$RAR3\$\*0\*",                       "RAR3-hp — hashcat 12500",                                 "Archive"),
-    (r"^\$RAR3\$\*1\*",                       "RAR3-p uncompressed — hashcat 23700",                     "Archive"),
-    (r"^\$rar5\$",                            "RAR5 — hashcat 13000",                                    "Archive"),
-    (r"^\$7z\$",                              "7-Zip — hashcat 11600",                                   "Archive"),
-    (r"^\$zip2\$",                            "WinZip AES — hashcat 13600",                              "Archive"),
-    (r"^\$pkzip2\$",                          "PKZIP — hashcat 17200-17230",                             "Archive"),
-    (r"^\$zip3\$",                            "SecureZIP AES — hashcat 23001-23003",                     "Archive"),
-    (r"^\$axcrypt\$\*1\*",                    "AxCrypt 1 — hashcat 13200",                               "Archive"),
-    (r"^\$axcrypt\$\*2\*",                    "AxCrypt 2 — hashcat 23500/23600",                         "Archive"),
-    (r"^\$axcrypt_sha1\$",                    "AxCrypt 1 in-memory SHA1 — hashcat 13300",                "Archive"),
-    (r"^\$itunes_backup\$\*9\*",              "iTunes backup < 10.0 — hashcat 14700",                    "Archive"),
-    (r"^\$itunes_backup\$\*10\*",             "iTunes backup >= 10.0 — hashcat 14800",                   "Archive"),
-    (r"^\$vbk\$",                             "Veeam VBK — hashcat 31200",                               "Archive"),
-    (r"^\$ab\$",                              "Android Backup — hashcat 18900",                          "Archive"),
-
+    (r"^\$RAR3\$\*0\*",                         "RAR3-hp — hashcat 12500",                                "Archive"),
+    (r"^\$RAR3\$\*1\*",                         "RAR3-p uncompressed — hashcat 23700",                    "Archive"),
+    (r"^\$rar5\$",                              "RAR5 — hashcat 13000",                                   "Archive"),
+    (r"^\$7z\$",                                "7-Zip — hashcat 11600",                                  "Archive"),
+    (r"^\$zip2\$",                              "WinZip AES — hashcat 13600",                             "Archive"),
+    (r"^\$pkzip2\$",                            "PKZIP — hashcat 17200-17230",                            "Archive"),
+    (r"^\$zip3\$",                              "SecureZIP AES — hashcat 23001-23003",                    "Archive"),
+    (r"^\$axcrypt\$\*1\*",                      "AxCrypt 1 — hashcat 13200",                              "Archive"),
+    (r"^\$axcrypt\$\*2\*",                      "AxCrypt 2 — hashcat 23500/23600",                        "Archive"),
+    (r"^\$axcrypt_sha1\$",                      "AxCrypt 1 in-memory SHA1 — hashcat 13300",               "Archive"),
+    (r"^\$itunes_backup\$\*9\*",                "iTunes backup < 10.0 — hashcat 14700",                   "Archive"),
+    (r"^\$itunes_backup\$\*10\*",               "iTunes backup >= 10.0 — hashcat 14800",                  "Archive"),
+    (r"^\$vbk\$",                               "Veeam VBK — hashcat 31200",                              "Archive"),
+    (r"^\$ab\$",                                "Android Backup — hashcat 18900",                         "Archive"),
     # ── Documents ────────────────────────────────────────────────────────────
-    (r"^\$office\$\*200[79]\*",               "MS Office 2007/2009 — hashcat 9400",                      "Document"),
-    (r"^\$office\$\*2010\*",                  "MS Office 2010 — hashcat 9500",                           "Document"),
-    (r"^\$office\$\*2013\*",                  "MS Office 2013 — hashcat 9600",                           "Document"),
-    (r"^\$office\$\*2016\*",                  "MS Office 2016 SheetProtection — hashcat 25300",          "Document"),
-    (r"^\$oldoffice\$[01]\*",                 "MS Office <= 2003 MD5+RC4 — hashcat 9700",                "Document"),
-    (r"^\$oldoffice\$[34]\*",                 "MS Office <= 2003 SHA1+RC4 — hashcat 9800",               "Document"),
-    (r"^\$pdf\$1\*",                          "PDF 1.1-1.3 Acrobat 2-4 — hashcat 10400",                "Document"),
-    (r"^\$pdf\$2\*",                          "PDF 1.4-1.6 Acrobat 5-8 — hashcat 10500",                "Document"),
-    (r"^\$pdf\$5\*5\*",                       "PDF 1.7 Level 3 Acrobat 9 — hashcat 10600",              "Document"),
-    (r"^\$pdf\$5\*6\*",                       "PDF 1.7 Level 8 Acrobat 10-11 — hashcat 10700",          "Document"),
-    (r"^\$odf\$\*1\*",                        "ODF 1.2 SHA-256+AES — hashcat 18400",                    "Document"),
-    (r"^\$odf\$\*0\*",                        "ODF 1.1 SHA-1+Blowfish — hashcat 18600",                  "Document"),
-    (r"^\$ASN\$\*",                           "Apple Secure Notes — hashcat 16200",                     "Document"),
-    (r"^\$iwork\$",                           "Apple iWork — hashcat 23300",                             "Document"),
-
+    (r"^\$office\$\*200[79]\*",                 "MS Office 2007/2009 — hashcat 9400",                     "Document"),
+    (r"^\$office\$\*2010\*",                    "MS Office 2010 — hashcat 9500",                          "Document"),
+    (r"^\$office\$\*2013\*",                    "MS Office 2013 — hashcat 9600",                          "Document"),
+    (r"^\$office\$\*2016\*",                    "MS Office 2016 SheetProtection — hashcat 25300",         "Document"),
+    (r"^\$oldoffice\$[01]\*",                   "MS Office <= 2003 MD5+RC4 — hashcat 9700",               "Document"),
+    (r"^\$oldoffice\$[34]\*",                   "MS Office <= 2003 SHA1+RC4 — hashcat 9800",              "Document"),
+    (r"^\$pdf\$1\*",                            "PDF 1.1-1.3 Acrobat 2-4 — hashcat 10400",               "Document"),
+    (r"^\$pdf\$2\*",                            "PDF 1.4-1.6 Acrobat 5-8 — hashcat 10500",               "Document"),
+    (r"^\$pdf\$5\*5\*",                         "PDF 1.7 Level 3 Acrobat 9 — hashcat 10600",             "Document"),
+    (r"^\$pdf\$5\*6\*",                         "PDF 1.7 Level 8 Acrobat 10-11 — hashcat 10700",         "Document"),
+    (r"^\$odf\$\*1\*",                          "ODF 1.2 SHA-256+AES — hashcat 18400",                   "Document"),
+    (r"^\$odf\$\*0\*",                          "ODF 1.1 SHA-1+Blowfish — hashcat 18600",                 "Document"),
+    (r"^\$ASN\$\*",                             "Apple Secure Notes — hashcat 16200",                    "Document"),
+    (r"^\$iwork\$",                             "Apple iWork — hashcat 23300",                            "Document"),
     # ── Password managers ─────────────────────────────────────────────────────
-    (r"^1000:[a-f0-9]{16}:",                  "1Password agilekeychain — hashcat 6600",                  "Password Manager"),
-    (r"^\$keepass\$\*2\*",                    "KeePass KDBX v2/v3 — hashcat 13400",                     "Password Manager"),
-    (r"^\$keepass\$\*4\*",                    "KeePass KDBX v4 — hashcat 34300",                        "Password Manager"),
-    (r"^\$mobilekeychain\$",                  "1Password mobilekeychain v8 — hashcat 31800",             "Password Manager"),
-    (r"^\$ansible\$",                         "Ansible Vault — hashcat 16900",                           "Password Manager"),
-    (r"^\$bitwarden\$",                       "Bitwarden — hashcat 23400",                               "Password Manager"),
-    (r"^\$keychain\$\*",                      "Apple Keychain — hashcat 23100",                          "Password Manager"),
-    (r"^\$mozilla\$\*3DES\*",                 "Mozilla key3.db — hashcat 26000",                         "Password Manager"),
-    (r"^\$mozilla\$\*AES\*",                  "Mozilla key4.db — hashcat 26100",                         "Password Manager"),
-
+    (r"^1000:[a-f0-9]{16}:",                    "1Password agilekeychain — hashcat 6600",                 "Password Manager"),
+    (r"^\$keepass\$\*2\*",                      "KeePass KDBX v2/v3 — hashcat 13400",                    "Password Manager"),
+    (r"^\$keepass\$\*4\*",                      "KeePass KDBX v4 — hashcat 34300",                       "Password Manager"),
+    (r"^\$mobilekeychain\$",                    "1Password mobilekeychain v8 — hashcat 31800",            "Password Manager"),
+    (r"^\$ansible\$",                           "Ansible Vault — hashcat 16900",                          "Password Manager"),
+    (r"^\$bitwarden\$",                         "Bitwarden — hashcat 23400",                              "Password Manager"),
+    (r"^\$keychain\$\*",                        "Apple Keychain — hashcat 23100",                         "Password Manager"),
+    (r"^\$mozilla\$\*3DES\*",                   "Mozilla key3.db — hashcat 26000",                        "Password Manager"),
+    (r"^\$mozilla\$\*AES\*",                    "Mozilla key4.db — hashcat 26100",                        "Password Manager"),
     # ── Cryptocurrency wallets ────────────────────────────────────────────────
-    (r"^\$bitcoin\$",                         "Bitcoin/Litecoin wallet.dat — hashcat 11300",             "Cryptocurrency"),
-    (r"^\$blockchain\$v2\$",                  "Blockchain My Wallet V2 — hashcat 15200",                 "Cryptocurrency"),
-    (r"^\$blockchain\$[0-9]",                 "Blockchain My Wallet — hashcat 12700",                    "Cryptocurrency"),
-    (r"^\$blockchain\$269\$",                 "Blockchain My Wallet (Legacy) — hashcat 34700",           "Cryptocurrency"),
-    (r"^\$ethereum\$p\*",                     "Ethereum PBKDF2-HMAC-SHA256 — hashcat 15600",             "Cryptocurrency"),
-    (r"^\$ethereum\$s\*",                     "Ethereum SCRYPT — hashcat 15700",                         "Cryptocurrency"),
-    (r"^\$ethereum\$w\*",                     "Ethereum Pre-Sale Wallet — hashcat 16300",                "Cryptocurrency"),
-    (r"^\$electrum\$[1-3]\*",                 "Electrum Wallet Salt-Type 1-3 — hashcat 16600",           "Cryptocurrency"),
-    (r"^\$electrum\$4\*",                     "Electrum Wallet Salt-Type 4 — hashcat 21700",             "Cryptocurrency"),
-    (r"^\$electrum\$5\*",                     "Electrum Wallet Salt-Type 5 — hashcat 21800",             "Cryptocurrency"),
-    (r"^\$metamask\$",                        "MetaMask Desktop Wallet — hashcat 26600",                 "Cryptocurrency"),
-    (r"^\$metamask-short\$",                  "MetaMask Desktop Wallet (short) — hashcat 26610",         "Cryptocurrency"),
-    (r"^\$metamaskMobile\$",                  "MetaMask Mobile Wallet — hashcat 31900",                  "Cryptocurrency"),
-    (r"^\$multibit\$1\*",                     "MultiBit Classic .key — hashcat 22500",                   "Cryptocurrency"),
-    (r"^\$multibit\$2\*",                     "MultiBit HD scrypt — hashcat 22700",                      "Cryptocurrency"),
-    (r"^\$multibit\$3\*",                     "MultiBit Classic .wallet scrypt — hashcat 27700",         "Cryptocurrency"),
-    (r"^\$bisq\$",                            "Bisq .wallet scrypt — hashcat 29800",                     "Cryptocurrency"),
-    (r"^\$dogechain\$",                       "Dogechain.info Wallet — hashcat 32500",                   "Cryptocurrency"),
-    (r"^\$stellar\$",                         "Stargazer Stellar XLM — hashcat 25500",                   "Cryptocurrency"),
-    (r"EXODUS:",                              "Exodus Desktop Wallet scrypt — hashcat 28200",             "Cryptocurrency"),
-    (r"^\$diskcryptor\$",                     "DiskCryptor SHA512+XTS — hashcat 20011-20013",             "FDE"),
-
+    (r"^\$bitcoin\$",                           "Bitcoin/Litecoin wallet.dat — hashcat 11300",            "Cryptocurrency"),
+    (r"^\$blockchain\$v2\$",                    "Blockchain My Wallet V2 — hashcat 15200",                "Cryptocurrency"),
+    (r"^\$blockchain\$[0-9]",                   "Blockchain My Wallet — hashcat 12700",                   "Cryptocurrency"),
+    (r"^\$blockchain\$269\$",                   "Blockchain My Wallet (Legacy) — hashcat 34700",          "Cryptocurrency"),
+    (r"^\$ethereum\$p\*",                       "Ethereum PBKDF2-HMAC-SHA256 — hashcat 15600",            "Cryptocurrency"),
+    (r"^\$ethereum\$s\*",                       "Ethereum SCRYPT — hashcat 15700",                        "Cryptocurrency"),
+    (r"^\$ethereum\$w\*",                       "Ethereum Pre-Sale Wallet — hashcat 16300",               "Cryptocurrency"),
+    (r"^\$electrum\$[1-3]\*",                   "Electrum Wallet Salt-Type 1-3 — hashcat 16600",          "Cryptocurrency"),
+    (r"^\$electrum\$4\*",                       "Electrum Wallet Salt-Type 4 — hashcat 21700",            "Cryptocurrency"),
+    (r"^\$electrum\$5\*",                       "Electrum Wallet Salt-Type 5 — hashcat 21800",            "Cryptocurrency"),
+    (r"^\$metamask\$",                          "MetaMask Desktop Wallet — hashcat 26600",                "Cryptocurrency"),
+    (r"^\$metamask-short\$",                    "MetaMask Desktop Wallet (short) — hashcat 26610",        "Cryptocurrency"),
+    (r"^\$metamaskMobile\$",                    "MetaMask Mobile Wallet — hashcat 31900",                 "Cryptocurrency"),
+    (r"^\$multibit\$1\*",                       "MultiBit Classic .key — hashcat 22500",                  "Cryptocurrency"),
+    (r"^\$multibit\$2\*",                       "MultiBit HD scrypt — hashcat 22700",                     "Cryptocurrency"),
+    (r"^\$multibit\$3\*",                       "MultiBit Classic .wallet scrypt — hashcat 27700",        "Cryptocurrency"),
+    (r"^\$bisq\$",                              "Bisq .wallet scrypt — hashcat 29800",                    "Cryptocurrency"),
+    (r"^\$dogechain\$",                         "Dogechain.info Wallet — hashcat 32500",                  "Cryptocurrency"),
+    (r"^\$stellar\$",                           "Stargazer Stellar XLM — hashcat 25500",                  "Cryptocurrency"),
+    (r"EXODUS:",                                "Exodus Desktop Wallet scrypt — hashcat 28200",           "Cryptocurrency"),
     # ── Private keys ──────────────────────────────────────────────────────────
-    (r"^\$sshng\$0\$",                        "RSA/DSA/EC/OpenSSH Private Key ($0$) — hashcat 22911",    "Private Key"),
-    (r"^\$sshng\$6\$",                        "RSA/DSA/EC/OpenSSH Private Key ($6$) — hashcat 22921",    "Private Key"),
-    (r"^\$sshng\$1\$|^\$sshng\$3\$",         "RSA/DSA/EC/OpenSSH Private Key ($1/$3$) — hashcat 22931", "Private Key"),
-    (r"^\$sshng\$4\$",                        "RSA/DSA/EC/OpenSSH Private Key ($4$) — hashcat 22941",    "Private Key"),
-    (r"^\$sshng\$5\$",                        "RSA/DSA/EC/OpenSSH Private Key ($5$) — hashcat 22951",    "Private Key"),
-    (r"^\$jksprivk\$\*",                      "JKS Java Key Store Private Keys — hashcat 15500",         "Private Key"),
-    (r"^\$gpg\$\*1\*",                        "GPG encrypted private key — hashcat 17010-17040",          "Private Key"),
-    (r"^\$PEM\$[12]\$",                       "PKCS#8 Private Key PBKDF2 — hashcat 24410/24420",         "Private Key"),
-
+    (r"^\$sshng\$0\$",                          "RSA/DSA/EC/OpenSSH Private Key ($0$) — hashcat 22911",   "Private Key"),
+    (r"^\$sshng\$6\$",                          "RSA/DSA/EC/OpenSSH Private Key ($6$) — hashcat 22921",   "Private Key"),
+    (r"^\$sshng\$1\$|^\$sshng\$3\$",           "RSA/DSA/EC/OpenSSH Private Key ($1/$3$) — hashcat 22931","Private Key"),
+    (r"^\$sshng\$4\$",                          "RSA/DSA/EC/OpenSSH Private Key ($4$) — hashcat 22941",   "Private Key"),
+    (r"^\$sshng\$5\$",                          "RSA/DSA/EC/OpenSSH Private Key ($5$) — hashcat 22951",   "Private Key"),
+    (r"^\$jksprivk\$\*",                        "JKS Java Key Store Private Keys — hashcat 15500",        "Private Key"),
+    (r"^\$gpg\$\*1\*",                          "GPG encrypted private key — hashcat 17010-17040",         "Private Key"),
+    (r"^\$PEM\$[12]\$",                         "PKCS#8 Private Key PBKDF2 — hashcat 24410/24420",        "Private Key"),
     # ── BLAKE2 prefixed ───────────────────────────────────────────────────────
-    (r"^\$BLAKE2\$[0-9a-f]{128}(?::[0-9]+)?","BLAKE2b-512 — hashcat 600/610/620",                       "BLAKE Family"),
-    (r"^\$BLAKE2\$[0-9a-f]{64}(?::[0-9]+)?", "BLAKE2b-256 / BLAKE2s-256 — hashcat 34800/31000",         "BLAKE Family"),
-
+    (r"^\$BLAKE2\$[0-9a-f]{128}(?::[0-9]+)?",  "BLAKE2b-512 — hashcat 600/610/620",                      "BLAKE Family"),
+    (r"^\$BLAKE2\$[0-9a-f]{64}(?::[0-9]+)?",   "BLAKE2b-256 / BLAKE2s-256 — hashcat 34800/31000",        "BLAKE Family"),
     # ── Instant messaging ─────────────────────────────────────────────────────
-    (r"^\$teamspeak\$3\$",                    "Teamspeak 3 channel hash — hashcat 28300",                "Instant Messaging"),
-    (r"^\$telegram\$0\*",                     "Telegram Mobile App Passcode SHA-256 — hashcat 22301",    "Instant Messaging"),
-    (r"^\$telegram\$1\*",                     "Telegram Desktop < v2.1.14 PBKDF2-SHA1 — hashcat 22600", "Instant Messaging"),
-    (r"^\$telegram\$2\*",                     "Telegram Desktop >= v2.1.14 PBKDF2-SHA512 — hashcat 24500", "Instant Messaging"),
-
+    (r"^\$teamspeak\$3\$",                      "Teamspeak 3 channel hash — hashcat 28300",               "Instant Messaging"),
+    (r"^\$telegram\$0\*",                       "Telegram Mobile App Passcode SHA-256 — hashcat 22301",   "Instant Messaging"),
+    (r"^\$telegram\$1\*",                       "Telegram Desktop < v2.1.14 PBKDF2-SHA1 — hashcat 22600","Instant Messaging"),
+    (r"^\$telegram\$2\*",                       "Telegram Desktop >= v2.1.14 PBKDF2-SHA512 — hashcat 24500","Instant Messaging"),
     # ── Misc prefixes not covered above ──────────────────────────────────────
-    (r"^\$xmpp-scram\$",                      "XMPP SCRAM PBKDF2-SHA1 — hashcat 23200",                  "Instant Messaging"),
-    (r"^\$DCC2\$",                            "DCC2 / MS Cache 2 — hashcat 2100",                        "Windows"),
-    (r"^\$sntp-ms\$",                         "MS SNTP — hashcat 31300",                                 "Network Protocol"),
-    (r"^\$uido\$",                            "iPhone passcode (UID+Keybag) — hashcat 26500",            "Mobile"),
-    (r"^\$rc4\$",                             "RC4 DropN — hashcat 33500/33501/33502",                   "Raw Cipher"),
-    (r"^\$chacha20\$",                        "ChaCha20 — hashcat 15400",                                "Raw Cipher"),
-    (r"^\$cryptoapi\$",                       "Linux Kernel Crypto API — hashcat 14500",                 "Raw Cipher"),
-    (r"^P!\$",                                "mega.nz protected link — hashcat 33400",                  "Archive"),
+    (r"^\$xmpp-scram\$",                        "XMPP SCRAM PBKDF2-SHA1 — hashcat 23200",                 "Instant Messaging"),
+    (r"^\$DCC2\$",                              "DCC2 / MS Cache 2 — hashcat 2100",                       "Windows"),
+    (r"^\$sntp-ms\$",                           "MS SNTP — hashcat 31300",                                "Network Protocol"),
+    (r"^\$uido\$",                              "iPhone passcode (UID+Keybag) — hashcat 26500",           "Mobile"),
+    (r"^\$rc4\$",                               "RC4 DropN — hashcat 33500/33501/33502",                  "Raw Cipher"),
+    (r"^\$chacha20\$",                          "ChaCha20 — hashcat 15400",                               "Raw Cipher"),
+    (r"^\$cryptoapi\$",                         "Linux Kernel Crypto API — hashcat 14500",                "Raw Cipher"),
+    (r"^P!\$",                                  "mega.nz protected link — hashcat 33400",                 "Archive"),
 ]
 
 # ---------------------------------------------------------------------------
-# HEX-LENGTH MAP  →  (candidates_list, category)
+# HEX-LENGTH MAP
 # ---------------------------------------------------------------------------
 HEX_LENGTH_MAP = {
     8:   (["CRC32 (hashcat 11500)", "Adler-32", "FNV-1 (32-bit)", "xxHash XXH32",
@@ -836,13 +961,12 @@ EXTRA_PATTERNS = [
      "RC4 DropN — hashcat 33500/33501/33502", "Raw Cipher"),
     (r"^\$chacha20\$\*",
      "ChaCha20 — hashcat 15400", "Raw Cipher"),
-    # DANE RFC7929 SHA-256 truncated (56 chars but less than standard SHA-224)
     (r"^[a-f0-9]{56}:[a-f0-9]{0}$",
      "DANE RFC7929 SHA2-256 — hashcat 30420", "Network Protocol"),
 ]
 
 # ---------------------------------------------------------------------------
-# HASH FAMILIES  (for --list display)
+# HASH FAMILIES
 # ---------------------------------------------------------------------------
 HASH_FAMILIES = {
     "MD Family":            ["MD2", "MD4", "MD5 (hc:0)", "MD6 (hc:34600)"],
@@ -967,20 +1091,13 @@ HASH_FAMILIES = {
 # ---------------------------------------------------------------------------
 
 def identify(hash_string):
-    """Returns (algorithm_string, confidence, warning_or_None, category)."""
     h = hash_string.strip()
-
-    # 1. Modular / prefixed patterns — highest specificity
     for pattern, name, category in MODULAR_PATTERNS:
         if re.match(pattern, h, re.IGNORECASE):
             return name, "HIGH", None, category
-
-    # 2. Extra non-prefixed structural patterns
     for pattern, name, category in EXTRA_PATTERNS:
         if name and re.match(pattern, h, re.IGNORECASE):
             return name, "MEDIUM", None, category
-
-    # 3. Pure hex — use length map
     if re.match(r"^[a-f0-9]+$", h, re.IGNORECASE):
         entry = HEX_LENGTH_MAP.get(len(h))
         if entry:
@@ -991,19 +1108,13 @@ def identify(hash_string):
             confidence = "HIGH" if len(candidates) == 1 else "MEDIUM"
             return ", ".join(candidates), confidence, note, category
         return "Unknown (unrecognised hex length)", "LOW", None, "Unknown"
-
-    # 4. Possible shell-expansion victim
     if not h.startswith("$") and len(h) in (44, 52, 53, 31):
         return "Unknown", "LOW", "Hash may be shell-expanded — wrap in single quotes", "Unknown"
-
-    # 5. Base64-like
     if re.match(r"^[A-Za-z0-9+/]+=*$", h) and len(h) >= 24:
         bit_len = (len(h) * 6) // 8
         return (f"Possible base64-encoded hash (~{bit_len} bytes decoded)",
-                "LOW",
-                "Decode from base64 first for accurate identification",
+                "LOW", "Decode from base64 first for accurate identification",
                 "Base64-encoded")
-
     return "Unknown", "LOW", None, "Unknown"
 
 
@@ -1035,7 +1146,7 @@ def print_banner():
         print(GREEN + "#" + line.center(W) + "#" + RESET)
     print(GREEN + "#" + " " * W + "#" + RESET)
     print(GREEN + "#" + "Hash Algorithm Identifier".center(W) + "#" + RESET)
-    print(GREEN + "#" + "By Sh4d0wSpl01t v3.0".center(W) + "#" + RESET)
+    print(GREEN + "#" + "By Sh4d0wSpl01t v4.1".center(W) + "#" + RESET)
     print(GREEN + "#" + " " * W + "#" + RESET)
     print(GREEN + "#" * 80 + RESET)
 
@@ -1061,14 +1172,17 @@ def analyse(hash_string):
     algo, confidence, warning, category = identify(hash_string)
     short = hash_string[:60] + ("..." if len(hash_string) > 60 else "")
     conf_color = GREEN if confidence == "HIGH" else (YELLOW if confidence == "MEDIUM" else "")
-    hc_modes = suggest_hashcat(algo)
-    hc_str = ", ".join(str(m) for m in hc_modes) if hc_modes else "N/A"
+    hc_modes  = suggest_hashcat(algo)
+    jtr_fmts  = suggest_john(algo)
+    hc_str  = ", ".join(str(m) for m in hc_modes) if hc_modes else "N/A"
+    jtr_str = ", ".join(jtr_fmts) if jtr_fmts else "N/A"
     print(f"\n  Hash      : {short}")
     print(GREEN + f"  Algorithm : {algo}" + RESET)
     print(f"  Category  : {CYAN}{category}{RESET}")
     print(f"  Confidence: {conf_color}{confidence}{RESET}")
     if hc_modes:
         print(f"  Hashcat -m: {MAGENTA}{hc_str}{RESET}")
+    print(f"  John fmt  : {BLUE}--format={jtr_str}{RESET}")
     if warning:
         print(f"  {YELLOW}Warning{RESET}   : {warning}")
     print()
@@ -1115,12 +1229,15 @@ if __name__ == "__main__":
                 algo = ", ".join(matched) + " (verified)"
                 confidence = "HIGH"
         hc_modes = suggest_hashcat(algo)
-        hc_str = ", ".join(str(m) for m in hc_modes) if hc_modes else "N/A"
+        jtr_fmts = suggest_john(algo)
+        hc_str  = ", ".join(str(m) for m in hc_modes) if hc_modes else "N/A"
+        jtr_str = ", ".join(jtr_fmts) if jtr_fmts else "N/A"
         print(f"Hash      : {short}")
         print(GREEN + f"Algorithm : {algo}" + RESET)
         print(f"Category  : {CYAN}{category}{RESET}")
         print(f"Confidence: {confidence}")
         if hc_modes:
             print(MAGENTA + f"Hashcat -m: {hc_str}" + RESET)
+        print(BLUE + f"John fmt  : --format={jtr_str}" + RESET)
         if warning:
             print(YELLOW + f"Warning   : {warning}" + RESET)
