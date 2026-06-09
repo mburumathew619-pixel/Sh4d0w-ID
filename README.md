@@ -14,6 +14,8 @@ CTF players face a different version of the same problem. Challenges deliberatel
 For security researchers and forensic analysts, hash identification shows up during code audits — finding places where a codebase stores passwords in MD5 or unsalted SHA-1 without the algorithm being documented anywhere in the code — and during incident response, where you need to determine whether recovered credentials use a format that indicates outdated security practices or an active risk.
 The broader point is that hash identification is a bottleneck, not the interesting work. It sits between finding credentials and doing anything with them, and every minute spent on it is a minute not spent on the actual objective. A tool that makes it instantaneous and also hands you the cracking command has real, compounding value over the course of a long engagement or a 24-hour CTF.
 Sh4d0w-ID covers the full realistic range — not just the obvious MD5/SHA-1 cases that anyone can eyeball, but Kerberos ticket formats, database-specific hash schemes, cryptocurrency wallet formats, FDE headers, and dozens of application-specific implementations that only appear in the wild occasionally but matter enormously when they do.
+<img width="1257" height="618" alt="Screenshot_2026-06-09_03-08-21" src="https://github.com/user-attachments/assets/82442c6f-c9ea-4efe-8882-0d532f1fc0d1" />
+
 
 ********************Basic Installation & Usage Guide********************
 
